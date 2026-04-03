@@ -170,7 +170,7 @@ Shader "Unlit/SimpleLightShader"
 
                 half3 viewDir = normalize(GetWorldSpaceViewDir(v.positionWS));
 
-                half3 ARM = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_BaseMap, v.uv);
+                half3 ARM = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, v.uv);
                 half metalMask = ARM.b;
                 half smoothness = 1 - ARM.g;
 
@@ -222,7 +222,7 @@ Shader "Unlit/SimpleLightShader"
                     specular *= NdotL;
 
                     diffuse *= (1.0h - metalMask);
-                    specular *= lerp(1.0h, 2.0h, metalMask);
+                    specular *= lerp(0.2h, 2.5h, metalMask);
 
                     customLightAccum += lightColor * (diffuse + specular) * falloff;
                 }
