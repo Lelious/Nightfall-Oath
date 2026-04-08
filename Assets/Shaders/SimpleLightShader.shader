@@ -49,6 +49,7 @@ Shader "Unlit/SimpleLightShader"
             #pragma multi_compile _ _SHADOWS_SOFT 
             #pragma target 2.0
 
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
 
             struct Attributes
@@ -106,7 +107,7 @@ Shader "Unlit/SimpleLightShader"
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
 
                 float3 tangentWS = TransformObjectToWorldDir(v.tangentOS.xyz);
-                o.tangentWS = float4(normalize(tangentWS), v.tangentOS.w);
+                o.tangentWS = normalize(tangentWS);
                 float3 bitangentWS = cross(o.normalWS, o.tangentWS.xyz) * v.tangentOS.w;
                 o.bitangentWS = normalize(bitangentWS);
                 o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
@@ -170,7 +171,7 @@ Shader "Unlit/SimpleLightShader"
 
                 half3 viewDir = normalize(GetWorldSpaceViewDir(v.positionWS));
 
-                half3 ARM = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, v.uv);
+                half3 ARM = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, v.uv).rgb;
                 half metalMask = ARM.b;
                 half smoothness = 1 - ARM.g;
 
@@ -192,6 +193,11 @@ Shader "Unlit/SimpleLightShader"
 
                 half3 customLightAccum = 0;
 
+                half specMul = lerp(0.2h, 2.5h, metalMask);
+                half diffMul = (1.0h - metalMask);
+                half mainLightIntensity = dot(_MainLightColor.rgb, half3(0.2126, 0.7152, 0.0722)); 
+                half additionalLightFactor = saturate(1.0 - mainLightIntensity / 2.2);
+
                 for (int idx = 0; idx < _LightCount; idx++)
                 {
                     half3 lightPos = _LightPositions[idx].xyz;
@@ -199,33 +205,36 @@ Shader "Unlit/SimpleLightShader"
                     half radius = _LightRadii[idx];
 
                     half3 L = lightPos - v.positionWS;
-                    half dist = length(L);
+                    half distSqr = dot(L, L);
+                    half radiusSqr = radius * radius;
 
-                    if (dist > radius)
+                    if (distSqr > radiusSqr)
                         continue;
 
-                    L /= dist;
+                    half invDist = rsqrt(distSqr);
+                    L *= invDist;
 
-                    half falloff = saturate(1.0h - dist / radius);
+                    half falloff = saturate(1.0h - distSqr / radiusSqr);
                     falloff *= falloff;
 
-                    half NdotL = saturate(dot(normalWS, L));
+                    half diffuse = saturate(dot(normalWS, L));
 
-                    half diffuse = NdotL;
+                    if(diffuse <= 0)
+                        continue;
 
                     half3 H = normalize(L + viewDir);
                     half NdotH = saturate(dot(normalWS, H));
 
-                    half specPower = lerp(16.0h, 128.0h, smoothness);
                     half specular = NdotH * NdotH;
                     specular *= specular;
-                    specular *= NdotL;
 
-                    diffuse *= (1.0h - metalMask);
-                    specular *= lerp(0.2h, 2.5h, metalMask);
+                    diffuse *= diffMul;
+                    specular *= specMul;
 
                     customLightAccum += lightColor * (diffuse + specular) * falloff;
                 }
+
+                customLightAccum *= additionalLightFactor;
 
                 col.rgb += customLightAccum * color.rgb;
 
@@ -255,13 +264,17 @@ Shader "Unlit/SimpleLightShader"
                 "LightMode"="ShadowCaster" 
             } 
             ZWrite On 
+            ZTest LEqual
             ColorMask 0 
 
             HLSLPROGRAM 
 
+            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
             #pragma vertex vertShadow 
             #pragma fragment fragShadow 
+
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl" 
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl" 
 
             struct Attributes 

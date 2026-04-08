@@ -103,13 +103,13 @@ Material:
     - _EdgeIntensity: 1
     - _EdgeWidth: 0.1
     - _EnvironmentReflections: 1
-    - _Fill: 0.504
+    - _Fill: 0.493
     - _Fuck: 0.69
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _HealAlpha: 0.6
-    - _HealFill: 0.214
+    - _HealFill: 0.229
     - _LowHPThreshold: 0.3
     - _Metallic: 0
     - _NoiseScale: 0.81
@@ -132,7 +132,7 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _EdgeColor: {r: 0.33917767, g: 0.66017693, b: 0.6981132, a: 1}
+    - _EdgeColor: {r: 0.28635636, g: 0.49359494, b: 0.5188679, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []

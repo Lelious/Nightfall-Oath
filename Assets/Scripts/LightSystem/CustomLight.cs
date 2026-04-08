@@ -19,6 +19,7 @@ public class CustomLight : MonoBehaviour
 
     private void OnDrawGizmos()
     {
+        Gizmos.color = _color;
         Gizmos.DrawWireSphere(transform.position, _radius);
     }
 }
