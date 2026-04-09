@@ -123,12 +123,14 @@ Shader "Unlit/HealthBar"
                 hpCol.rgb *= noiseVisual;
 
                 half4 healCol = baseCol * i.color; 
-                healCol.a = _HealAlpha * healMask * circleMask; 
+                half alpha = _HealAlpha * healMask * circleMask;
+                healCol = baseCol * i.color;
+                healCol.a = alpha;
 
                 half centerFactor = saturate(1.0 - abs(centeredUV.x)); 
                 half curvedEdgeWidth = _EdgeWidth * lerp(0.4, 1.2, centerFactor); 
                 half4 emptyColor = baseCol * emptyMask; 
-                emptyColor.a = 0.15f * circleMask; 
+                emptyColor.a = 0.05f * circleMask; 
                 half edge = smoothstep(_Fill - curvedEdgeWidth, _Fill, uv.y + noiseOffset); 
                 half3 edgeColor = _EdgeColor.rgb * edge * _EdgeIntensity * hpMask; 
 
