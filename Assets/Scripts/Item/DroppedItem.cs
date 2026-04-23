@@ -6,7 +6,7 @@ public class DroppedItem : MonoBehaviour, IPointerClickHandler
 {
     [SerializeField] private Inventory _inventory;
     [SerializeField] private Item _item;
-    [SerializeField] private TextMeshPro _itemName;
+    [SerializeField] private TextMeshPro _itemName;   
 
     private void Awake()
     {
@@ -25,5 +25,6 @@ public class DroppedItem : MonoBehaviour, IPointerClickHandler
         _inventory.TryPutItemToInventory(this);
     }
 
+    public EquippedWeaponType GetWeaponType() => _item.WeaponType;
     public Item GetItemInfo() => _item;
 }

@@ -17,11 +17,19 @@ Shader "Unlit/SimpleLightShader"
         _TargetDist ("TargetDist", Float) = 0
         _DissolveRadius ("DissolveRadius", Float) = 0
         _NoiseScale ("NoiseScale", Float) = 0
-        _MatcapIntensity("MatcapIntensity", Float) = 0
+        _MatcapIntensity ("MatcapIntensity", Float) = 0
+        _Fade ("Fade", Float) = 0
+        _Cutoff("Cutoff", Float) = 0
+        _FogColor ("Fog Color", Color) = (0.5,0.6,0.7,1)
+        _FogStart ("Fog Start", Float) = 10
+        _FogEnd ("Fog End", Float) = 60
+        _FogHeight ("Fog Height", Float) = 2
+        _FogDensity ("Fog Density", Float) = 0.5
     }
 
     SubShader 
-    { Tags 
+    { 
+        Tags 
         { 
             "RenderType" = "Opaque" 
             "RenderPipeline" = "UniversalPipeline" 
@@ -69,6 +77,7 @@ Shader "Unlit/SimpleLightShader"
                 half3 tangentWS   : TEXCOORD3;
                 half3 viewDirTS   : TEXCOORD4;
                 half3 bitangentWS : TEXCOORD6;
+                half fogFactor : TEXCOORD7;
             };
 
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
@@ -95,6 +104,13 @@ Shader "Unlit/SimpleLightShader"
                 half _TargetDist;
                 half _NoiseScale;
                 half _MatcapIntensity;
+                half _Fade;
+                half _Cutoff;
+                half4 _FogColor;
+                half _FogStart;
+                half _FogEnd;
+                half _FogHeight;
+                half _FogDensity;
             CBUFFER_END
 
             Varyings Vertex(Attributes v)
@@ -105,7 +121,18 @@ Shader "Unlit/SimpleLightShader"
                 o.positionCS = TransformWorldToHClip(o.positionWS);
 
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
+                half3 camPos = _WorldSpaceCameraPos;
+                half3 d = camPos - o.positionWS;
+                half distSqr = dot(d, d);
 
+                half distFog = saturate(
+                    (distSqr - _FogStart * _FogStart) /
+                    max(0.001, (_FogEnd * _FogEnd - _FogStart * _FogStart))
+                );
+
+                half heightFog = saturate((_FogHeight - o.positionWS.y) * _FogDensity);
+
+                o.fogFactor = distFog * heightFog;
                 float3 tangentWS = TransformObjectToWorldDir(v.tangentOS.xyz);
                 o.tangentWS = normalize(tangentWS);
                 float3 bitangentWS = cross(o.normalWS, o.tangentWS.xyz) * v.tangentOS.w;
@@ -156,13 +183,14 @@ Shader "Unlit/SimpleLightShader"
                 half2 screenUV = v.positionCS.xy / _ScreenParams.xy; 
                 half2 noiseUV = screenUV * _NoiseScale * half2(_ScreenParams.x / _ScreenParams.y, 1.0); 
                 half2 noise = SAMPLE_TEXTURE2D(_DissolveTex, sampler_DissolveTex, noiseUV).r; 
-                clip(noise - dissolveFactor);
+                clip(noise - dissolveFactor - _Fade);
 
                 half h = SAMPLE_TEXTURE2D(_HeightMap, sampler_HeightMap, v.uv).r;
                 half2 offset = (v.viewDirTS.xy / v.viewDirTS.z) * (h * _HeightScale);
                 half2 uv = v.uv + offset;
 
                 half4 color = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, v.uv) * _BaseColor;
+                clip(color.a - _Cutoff);
 
                 half4 nSample = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uv);
                 half3 normalTS = UnpackNormalScale(nSample, _NormalStrength);
@@ -251,11 +279,12 @@ Shader "Unlit/SimpleLightShader"
                 half matcapPower = metalMask * _MatcapIntensity;
 
                 col.rgb += matcap * metalMask * _MatcapIntensity * (1.0h + fresnel);
-
-                return half4(col.rgb, 1);
+                col.rgb = lerp(col.rgb, _FogColor.rgb, v.fogFactor);
+                return half4(col.rgb, col.a);
             }
             ENDHLSL
         }
+
         Pass 
         { 
             Name "ShadowCaster" 

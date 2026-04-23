@@ -29,8 +29,8 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
-    - _EdgeIntensity: 3.92
-    - _EdgeWidth: 0.016
+    - _EdgeIntensity: 0.8
+    - _EdgeWidth: 0.005
     - _Fill: 0
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}

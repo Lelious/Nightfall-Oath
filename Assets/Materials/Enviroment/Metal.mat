@@ -136,16 +136,22 @@ Material:
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
+    - _Fade: 0
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0
+    - _HeightCutoff: 2
     - _HeightScale: 0.0333
+    - _HeightSoftness: 1
     - _MatcapIntensity: 0.3
     - _Metallic: 0
     - _NoiseScale: 2
     - _NormalStrength: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.005
+    - _PlaneDist: 3
+    - _PlaneHeightOffset: 2
+    - _PlaneSoftness: 1
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _Shininess: 128
@@ -156,7 +162,7 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _TargetDist: 7
+    - _TargetDist: 6.5
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:

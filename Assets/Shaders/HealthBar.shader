@@ -65,6 +65,7 @@ Shader "Unlit/HealthBar"
                 float _NoiseScale;
                 float _NoiseSpeed;
                 float _NoiseStrength;
+                float _NoiseOffset;
 
                 float4 _EdgeColor;
                 float _EdgeWidth;
@@ -99,7 +100,7 @@ Shader "Unlit/HealthBar"
                 half dist = length(centeredUV); 
                 half circleMask = step(dist, 1.0); 
 
-                half2 noiseUV = uv * _NoiseScale + _Time.y * _NoiseSpeed;
+                half2 noiseUV = uv * _NoiseScale + _Time.y * _NoiseSpeed + _NoiseOffset;
                 half noiseSample = SAMPLE_TEXTURE2D(_NoiseTex, sampler_NoiseTex, noiseUV).r; 
                 half noise = (noiseSample - 0.5) * _NoiseStrength;  
                 half distFromTop = _Fill - uv.y;

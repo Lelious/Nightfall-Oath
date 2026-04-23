@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79f7f6f1f1a1c214c8b14e271274ee1b, type: 3}
+  m_Name: 1h_sword
+  m_EditorClassIdentifier: 
+  Idle: {fileID: -203655887218126122, guid: e9ab0001fcf08f141add2bb5f686059e, type: 3}
+  Run: {fileID: -203655887218126122, guid: 19c46a64e27277f49b6f29bd2dc3481f, type: 3}
+  Hit: {fileID: -203655887218126122, guid: caba130aa56efb44f8eeb311d71736d8, type: 3}
+  Attack1: {fileID: 6382398209410146843, guid: 586badb307955664abf204ae8d28bb2d, type: 3}
+  Attack2: {fileID: -2387443098007890872, guid: 586badb307955664abf204ae8d28bb2d, type: 3}
