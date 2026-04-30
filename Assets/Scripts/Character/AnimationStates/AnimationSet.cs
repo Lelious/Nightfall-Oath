@@ -8,4 +8,5 @@ public class AnimationSet : ScriptableObject
     public AnimationClip Hit;
     public AnimationClip Attack1;
     public AnimationClip Attack2;
+    public AnimationClip Death;
 }

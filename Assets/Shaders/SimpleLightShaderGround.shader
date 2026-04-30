@@ -42,6 +42,12 @@ Shader "Unlit/SimpleLightShaderGround"
             {
                 "LightMode" = "UniversalForward"
             } 
+            Stencil
+            {
+                Ref 1
+                Comp NotEqual
+                Pass Keep
+            }
 
             HLSLPROGRAM
 

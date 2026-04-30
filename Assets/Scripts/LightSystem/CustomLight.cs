@@ -22,4 +22,14 @@ public class CustomLight : MonoBehaviour
         Gizmos.color = _color;
         Gizmos.DrawWireSphere(transform.position, _radius);
     }
+
+    private void OnEnable()
+    {
+        FindAnyObjectByType<CustomLightService>().RegisterLightSource(this);
+    }
+
+    private void OnDisable()
+    {
+        FindAnyObjectByType<CustomLightService>().UnregisterLightSource(this);
+    }
 }

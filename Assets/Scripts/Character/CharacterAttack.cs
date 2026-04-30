@@ -1,3 +1,4 @@
+using LeliousExtentions;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -43,7 +44,7 @@ public class CharacterAttack : AttackComponent
 
         if (target == null) return;        
 
-        if(Vector3.Distance(transform.position, target.transform.position) > _attackDistance)
+        if(LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(target.transform.position.x, target.transform.position.z), _attackDistance))
         {
             _movementComponent.MoveToPoint(target.transform.position);
             _targetToChase = target;
@@ -63,7 +64,7 @@ public class CharacterAttack : AttackComponent
 
     private IEnumerator ChaseRoutine()
     {
-        while (Vector3.Distance(transform.position, _targetToChase.transform.position) > _attackDistance)
+        while (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(_targetToChase.transform.position.x, _targetToChase.transform.position.z), _attackDistance))
         {
             yield return new WaitForSeconds(0.1f);
         }

@@ -61,7 +61,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _NoiseTex:
-        m_Texture: {fileID: 2800000, guid: 58289d4a7af809241a11b39ca79a3fd2, type: 3}
+        m_Texture: {fileID: 2800000, guid: 5bd1080421014864d8c2178d36cecbe4, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -109,7 +109,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DistortionBlend: 0.5
     - _DistortionEnabled: 0
-    - _DistortionStrength: 0.15
+    - _DistortionStrength: -0.13
     - _DistortionStrengthScaled: 0.1
     - _DstBlend: 10
     - _DstBlendAlpha: 1
@@ -140,7 +140,7 @@ Material:
     - _BaseColor: {r: 1, g: 0.9527312, b: 0, a: 1}
     - _BaseColorAddSubDiff: {r: 1, g: 0, b: 0, a: 0}
     - _CameraFadeParams: {r: 0, g: Infinity, b: 0, a: 0}
-    - _Color: {r: 4.541206, g: 1.3790048, b: 0, a: 1}
+    - _Color: {r: 4.5412054, g: 0.76394606, b: 0, a: 1}
     - _EmissionColor: {r: 1, g: 0.19916238, b: 0, a: 1}
     - _NoiseSpeed: {r: 0.05, g: -0.1, b: 0, a: 0}
     - _SoftParticleFadeParams: {r: 0, g: 0, b: 0, a: 0}

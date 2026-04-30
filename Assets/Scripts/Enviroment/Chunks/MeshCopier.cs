@@ -14,6 +14,7 @@ public class MeshCopier : MonoBehaviour
     [SerializeField] private Vector3 _startPos;
     [SerializeField] private Vector3 _startPosVertex;
     [SerializeField] private NavMeshSurface _navSurf;
+    [SerializeField] private GameObject _navQuad;
 
     public float minHeight, maxHeight;
     public int chunkX;
@@ -74,6 +75,41 @@ public class MeshCopier : MonoBehaviour
 #endif
 
         Debug.Log("Splatmaps exported!");
+    }
+
+    [ContextMenu("GenerateNavQuads")]
+    public void GenerateNavQuads()
+    {
+        var mesh = _copyObject.GetComponent<MeshFilter>().sharedMesh;
+        var verts = mesh.vertices;
+        var gridSize = 64;
+
+        for (int z = 0; z < gridSize; z ++)
+        {
+            for (int x = 0; x < gridSize; x++)
+            {
+                int i0 = z * gridSize + x;
+
+                Vector3 p0 = _copyObject.transform.TransformPoint(verts[i0]);
+
+                Vector3 normal = _copyObject.transform.TransformDirection(mesh.normals[i0]).normalized;
+
+                Vector3 baseForward = Vector3.forward;
+                Vector3 forward = Vector3.ProjectOnPlane(baseForward, normal).normalized;
+
+                if (forward.sqrMagnitude < 0.001f)
+                {
+                    baseForward = Vector3.right;
+                    forward = Vector3.ProjectOnPlane(baseForward, normal).normalized;
+                }
+
+                Quaternion rot = Quaternion.LookRotation(forward, normal);
+
+                GameObject quad = Instantiate(_navQuad);
+                quad.transform.position = p0;
+                quad.transform.rotation = rot;
+            }
+        }
     }
 
     [ContextMenu("ConvertTrees")]

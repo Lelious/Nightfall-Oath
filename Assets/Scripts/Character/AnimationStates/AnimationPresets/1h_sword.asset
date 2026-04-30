@@ -17,3 +17,4 @@ MonoBehaviour:
   Hit: {fileID: -203655887218126122, guid: caba130aa56efb44f8eeb311d71736d8, type: 3}
   Attack1: {fileID: 6382398209410146843, guid: 586badb307955664abf204ae8d28bb2d, type: 3}
   Attack2: {fileID: -2387443098007890872, guid: 586badb307955664abf204ae8d28bb2d, type: 3}
+  Death: {fileID: -203655887218126122, guid: ea86283b8076e984a9f866ba2374521e, type: 3}

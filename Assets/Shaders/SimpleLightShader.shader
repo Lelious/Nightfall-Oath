@@ -12,10 +12,12 @@ Shader "Unlit/SimpleLightShader"
         _BaseColor ("Base Color", Color) = (1,1,1,1)
         _NormalStrength ("Normal Strength", Range(0,2)) = 1
         _HeightScale ("Height Scale", Range(0,0.05)) = 0.005
-        _CylinderRad ("CylinderRad", Range(8,128)) = 32
         _Softness ("Softness", Range(0,1)) = 0
         _TargetDist ("TargetDist", Float) = 0
         _DissolveRadius ("DissolveRadius", Float) = 0
+        _MaxRadius ("Max Radius (Near)", Float) = 10
+        _MinRadius ("Min Radius (Far)", Float) = 0
+        _MaxDistance ("Max Distance", Float) = 20
         _NoiseScale ("NoiseScale", Float) = 0
         _MatcapIntensity ("MatcapIntensity", Float) = 0
         _Fade ("Fade", Float) = 0
@@ -25,6 +27,9 @@ Shader "Unlit/SimpleLightShader"
         _FogEnd ("Fog End", Float) = 60
         _FogHeight ("Fog Height", Float) = 2
         _FogDensity ("Fog Density", Float) = 0.5
+        _DissolveEdge ("Dissolve Edge", Float) = 0
+        _DissolveColor ("Dissolve Color", Color) = (1,1,1,1)
+        _EdgeIntensity ("Edge Intensity", Float) = 0
     }
 
     SubShader 
@@ -42,6 +47,13 @@ Shader "Unlit/SimpleLightShader"
             {
                 "LightMode" = "UniversalForward"
             } 
+
+            Stencil
+            {
+                Ref 1
+                Comp NotEqual
+                Pass Keep
+            }
 
             HLSLPROGRAM
 
@@ -111,6 +123,12 @@ Shader "Unlit/SimpleLightShader"
                 half _FogEnd;
                 half _FogHeight;
                 half _FogDensity;
+                half _DissolveEdge;
+                half4 _DissolveColor;
+                half _EdgeIntensity;
+                half _MaxRadius;
+                half _MinRadius;
+                half _MaxDistance;
             CBUFFER_END
 
             Varyings Vertex(Attributes v)
@@ -167,23 +185,32 @@ Shader "Unlit/SimpleLightShader"
 
             half4 Fragment(Varyings v) : SV_Target
             {
-                half3 posVS = mul(unity_MatrixV, float4(v.positionWS, 1.0)).xyz;  
-                half pixelDepth = -posVS.z; 
-                half distFromAxis = length(posVS.xy);
+                half3 posVS = mul(unity_MatrixV, float4(v.positionWS, 1.0)).xyz;
 
-                half cylinderMask = 1.0 - saturate((distFromAxis - _CylinderRad) / max(0.001, _Softness));               
-                float depthRatio = saturate(pixelDepth / max(0.001, _TargetDist));
-                float dynamicRadius = depthRatio * _DissolveRadius;
-                float coneMask = 1.0 - saturate((distFromAxis - dynamicRadius) / max(0.001, _Softness));
-                float depthMask = saturate((_TargetDist - pixelDepth) / 0.5);  
-                float dissolveFactor = coneMask * depthMask;
-                half fade = (cylinderMask * depthMask);
+                half depth = -posVS.z;
+                half distFromCenter = length(posVS.xy);
+                half t = saturate(depth / max(0.001, _MaxDistance));
+                half radius = lerp(_MaxRadius, _MinRadius, t);
+                half coneMask = smoothstep(radius + _Softness, radius, distFromCenter);
+                half depthMask = step(0.0, depth) * step(depth, _MaxDistance);
+
+                half dissolveFactor = coneMask * depthMask;
+                half fade = (dissolveFactor * depthMask);
 
                 half threshold = Dither4x4(v.positionCS.xy); 
                 half2 screenUV = v.positionCS.xy / _ScreenParams.xy; 
-                half2 noiseUV = screenUV * _NoiseScale * half2(_ScreenParams.x / _ScreenParams.y, 1.0); 
-                half2 noise = SAMPLE_TEXTURE2D(_DissolveTex, sampler_DissolveTex, noiseUV).r; 
-                clip(noise - dissolveFactor - _Fade);
+                half2 noiseUV = v.uv * _NoiseScale;
+                half noise = SAMPLE_TEXTURE2D(_DissolveTex, sampler_DissolveTex, noiseUV).r;
+                half noise2 = SAMPLE_TEXTURE2D(_DissolveTex, sampler_DissolveTex, noiseUV * 2.3 + 17.0).r;
+                noise = lerp(noise, noise * noise2, 0.5);
+                noise = pow(noise, 1.5);
+                half d = noise - dissolveFactor;
+                d -= _Fade;
+                half edge = saturate(d / max(0.0001, _DissolveEdge));
+                edge = 1.0 - edge;
+                edge *= step(0.0, d);
+                edge = pow(edge, 2.0);
+                clip(d);
 
                 half h = SAMPLE_TEXTURE2D(_HeightMap, sampler_HeightMap, v.uv).r;
                 half2 offset = (v.viewDirTS.xy / v.viewDirTS.z) * (h * _HeightScale);
@@ -280,6 +307,7 @@ Shader "Unlit/SimpleLightShader"
 
                 col.rgb += matcap * metalMask * _MatcapIntensity * (1.0h + fresnel);
                 col.rgb = lerp(col.rgb, _FogColor.rgb, v.fogFactor);
+                col.rgb += edge * _DissolveColor.rgb * _EdgeIntensity;
                 return half4(col.rgb, col.a);
             }
             ENDHLSL

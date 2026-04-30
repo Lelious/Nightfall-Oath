@@ -88,7 +88,7 @@ public class ChunkGenerator : MonoBehaviour
             _hero.GetComponent<NavMeshAgent>().Warp(hit.position);
         }
 
-        //AssignTreeAndRock().Forget();
+        AssignTreeAndRock().Forget();
         _inited = true;
         Debug.Log($"{_heightDataNative.Length}");
     }
@@ -190,41 +190,43 @@ public class ChunkGenerator : MonoBehaviour
 
     private async UniTask AssignTreeAndRock()
     {
-        float dx;
-        float dz;
-        float distSqr;
-
         while (true)
         {
             foreach (var item in _trees)
             {
-                dx = _hero.transform.position.x - item.transform.position.x;
-                dz = _hero.transform.position.z - item.transform.position.z;
-                distSqr = dx * dx + dz * dz;
-
-                if (distSqr < _detailDist * _detailDist)
+                if(LeliousMathematic.FlatDistanceGreaterThan(new Vector2(_hero.transform.position.x, _hero.transform.position.z), 
+                    new Vector2(item.transform.position.x, item.transform.position.z), _detailDist))
                 {
-                    item.SetActive(true);
+                    if(item.activeInHierarchy)
+                    {
+                        item.SetActive(false);
+                    }
                 }
                 else
                 {
-                    item.SetActive(false);
-                }
+                    if (!item.activeInHierarchy)
+                    {
+                        item.SetActive(true);
+                    }
+                }            
             }
 
             foreach (var item in _rocks)
             {
-                dx = _hero.transform.position.x - item.transform.position.x;
-                dz = _hero.transform.position.z - item.transform.position.z;
-                distSqr = dx * dx + dz * dz;
-
-                if (distSqr < _detailDist * _detailDist)
+                if (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(_hero.transform.position.x, _hero.transform.position.z),
+                    new Vector2(item.transform.position.x, item.transform.position.z), _detailDist))
                 {
-                    item.SetActive(true);
+                    if (item.activeInHierarchy)
+                    {
+                        item.SetActive(false);
+                    }
                 }
                 else
                 {
-                    item.SetActive(false);
+                    if (!item.activeInHierarchy)
+                    {
+                        item.SetActive(true);
+                    }
                 }
             }
             await UniTask.Yield();

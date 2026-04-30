@@ -44,6 +44,7 @@ public class AnimationController : MonoBehaviour
         _overrideController["GetHit"] = _currentSet.AnimationSet.Hit;
         _overrideController["Attack1"] = _currentSet.AnimationSet.Attack1;
         _overrideController["Attack2"] = _currentSet.AnimationSet.Attack2;
+        _overrideController["Death"] = _currentSet.AnimationSet.Death;
     }
 
     [ContextMenu("StunEnter")]
