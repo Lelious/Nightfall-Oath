@@ -42,7 +42,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
-        m_Texture: {fileID: 2800000, guid: d483423ad46a8324f98165fe3980538e, type: 3}
+        m_Texture: {fileID: 2800000, guid: 60ee8338172047c489bef4333b4dc16f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
@@ -129,28 +129,28 @@ Material:
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DissolveEdge: 0
-    - _DissolveRadius: 1.6
+    - _DissolveRadius: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EdgeIntensity: 0
     - _EnvironmentReflections: 1
     - _Fade: 0
-    - _FogDensity: -1
-    - _FogEnd: 50
+    - _FogDensity: 1
+    - _FogEnd: 70
     - _FogHeight: 2
-    - _FogStart: 0
+    - _FogStart: 10
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossinessSource: 0
     - _GlossyReflections: 0
     - _HeightCutoff: 2
-    - _HeightScale: 0.015
+    - _HeightScale: 0.005
     - _HeightSoftness: 1
     - _MatcapIntensity: 0.3
-    - _MaxDistance: 0
-    - _MaxRadius: 10
+    - _MaxDistance: 8
+    - _MaxRadius: 2
     - _Metallic: 0
-    - _MinRadius: 0
+    - _MinRadius: 0.5
     - _NoiseScale: 1.8
     - _NormalStrength: 1
     - _OcclusionStrength: 1
@@ -174,11 +174,12 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 0.6792453, g: 0.6792453, b: 0.6792453, a: 1}
+    - _BaseColor: {r: 0.49296904, g: 0.5393952, b: 0.5471698, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DissolveColor: {r: 1, g: 1, b: 1, a: 1}
+    - _DissolveColor: {r: 1, g: 0.2901961, b: 0, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogColor: {r: 0.5, g: 0.6, b: 0.7, a: 1}
+    - _Offset: {r: 0, g: -0.81, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

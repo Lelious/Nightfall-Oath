@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7864574956653166302}
   - component: {fileID: 7092185910377898759}
   - component: {fileID: 6907644096368353761}
+  - component: {fileID: 3255922410261258871}
   m_Layer: 0
   m_Name: Fern_3
   m_TagString: Untagged
@@ -27,7 +28,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3381748246862195010}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.6148433, y: 0.382016, z: 0.5258559, w: -0.44666213}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
@@ -67,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 0d5ea65e91f99dc408598087bbde65ae, type: 2}
+  - {fileID: 2100000, guid: 109bb403c3e750446bb0a248fdbbffba, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -116,3 +117,17 @@ LODGroup:
     fadeTransitionWidth: 0
     renderers: []
   m_Enabled: 1
+--- !u!114 &3255922410261258871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3381748246862195010}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 195859c40db126c4db7dca1380aa70ce, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MapEnviromentObject
+  ID: 6
+  _persistentObject: 1

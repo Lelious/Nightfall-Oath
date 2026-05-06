@@ -82,15 +82,17 @@ public class AnimationController : MonoBehaviour
 
     private IEnumerator HitCoroutine()
     {
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(0.2f);
+
+        if (_stateMachine.CurrentState.AnimType == AnimationStateType.Hit)
+        {
+            _stateMachine.ReturnToIdle(0.2f);
+        }
+
+        yield return new WaitForSeconds(0.1f);
         _isFreeze = false;
         _isAttacking = false;
         _movementComponent.IsLockedMovement = false;
-
-        if(_stateMachine.CurrentState.AnimType == AnimationStateType.Hit)
-        {
-            _stateMachine.ReturnToIdle(0.1f);
-        }
     }
 
     [ContextMenu("DEBUGATTACK")]

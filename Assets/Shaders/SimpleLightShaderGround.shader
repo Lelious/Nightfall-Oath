@@ -128,18 +128,7 @@ Shader "Unlit/SimpleLightShaderGround"
                 o.positionWS = TransformObjectToWorld(v.positionOS);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
-                half3 camPos = _WorldSpaceCameraPos;
-                half3 d = camPos - o.positionWS;
-                half distSqr = dot(d, d);
 
-                half distFog = saturate(
-                    (distSqr - _FogStart * _FogStart) /
-                    max(0.001, (_FogEnd * _FogEnd - _FogStart * _FogStart))
-                );
-
-                half heightFog = saturate((_FogHeight - o.positionWS.y) * _FogDensity);
-
-                o.fogFactor = distFog * heightFog;
                 float3 tangentWS = TransformObjectToWorldDir(v.tangentOS.xyz);
                 o.tangentWS = normalize(tangentWS);
                 float3 bitangentWS = cross(o.normalWS, o.tangentWS.xyz) * v.tangentOS.w;
@@ -184,7 +173,6 @@ Shader "Unlit/SimpleLightShaderGround"
                 half3 posVS = mul(unity_MatrixV, float4(v.positionWS, 1.0)).xyz;  
                 half pixelDepth = -posVS.z; 
                 half distFromAxis = length(posVS.xy);
-
                 half cylinderMask = 1.0 - saturate((distFromAxis - _CylinderRad) / max(0.001, _Softness));               
                 half depthRatio = saturate(pixelDepth / max(0.001, _TargetDist));
                 half dynamicRadius = depthRatio * _DissolveRadius;
@@ -259,7 +247,7 @@ Shader "Unlit/SimpleLightShaderGround"
 
                 half metalMask = saturate(ARM.b);
                 half smoothness = saturate(1.0h - ARM.g);
-
+                Light mainLight = GetMainLight(TransformWorldToShadowCoord(v.positionWS));
                 InputData lighting = (InputData)0;
                 lighting.positionWS = v.positionWS;
                 lighting.shadowCoord = TransformWorldToShadowCoord(v.positionWS);
@@ -338,8 +326,21 @@ Shader "Unlit/SimpleLightShaderGround"
                 col.rgb += matcap * metalMask * _MatcapIntensity * (1.0h + fresnel);
                 float finnoise = frac(sin(dot(v.positionCS.xy , float2(12.9898,78.233))) * 43758.5453);
                 col.rgb += (finnoise - 0.5) * 0.003;
+                half3 camPos = _WorldSpaceCameraPos;
+                half dist = length(camPos - v.positionWS);
 
-                col.rgb = lerp(col.rgb, _FogColor.rgb, v.fogFactor);
+half fogFactor = saturate((dist - _FogStart) / (_FogEnd - _FogStart));
+
+// 2. ”лучшаем расчет €ркости тумана
+// „тобы туман не "светилс€" сам по себе, берем €ркость из MainLight
+half3 adjustedFogColor = _FogColor.rgb * mainLight.color;
+
+// 3. ѕлавный порог: используем smoothstep вместо линейного затухани€, 
+// чтобы у камеры туман гарантированно был нулевым
+fogFactor = smoothstep(0.0, 1.0, fogFactor);
+
+// 4. ‘инальное наложение
+col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
                 return half4(col.rgb, 1);
             }
             ENDHLSL

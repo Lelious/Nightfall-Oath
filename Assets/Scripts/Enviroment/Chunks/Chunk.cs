@@ -12,7 +12,7 @@ public class Chunk : MonoBehaviour
     public NativeArray<float3> Vertices;
     public NativeArray<float3> Normals;
 
-    private List<IMapObject> _chunkObjects = new();
+    private List<MapObjectInfo> _chunkObjectsInfo;
 
     private void Start()
     {
@@ -33,18 +33,10 @@ public class Chunk : MonoBehaviour
         }
     }
 
-    public void AssignMesh()
+    public void AssignMesh() => _meshFilter.mesh = Mesh;
+    public List<MapObjectInfo> GetChunkObjectsInfoList() => _chunkObjectsInfo;
+    public void InitializeChunk(List<MapObjectInfo> chunkObjects)
     {
-        _meshFilter.mesh = Mesh;
-    }
-
-    public void UpdateChunkObjects(Vector2 heroPosition)
-    {
-
-    }
-
-    public void InitializeChunk()
-    {
-
+        _chunkObjectsInfo = chunkObjects;
     }
 }

@@ -80,7 +80,6 @@ Shader "Unlit/SimpleLightShaderWind"
                 half3 tangentWS   : TEXCOORD3;
                 half3 viewDirTS   : TEXCOORD4;
                 half3 bitangentWS : TEXCOORD6;
-                half fogFactor : TEXCOORD7;
             };
 
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
@@ -153,18 +152,7 @@ Shader "Unlit/SimpleLightShaderWind"
                 o.positionCS = TransformWorldToHClip(o.positionWS);
 
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
-                half3 camPos = _WorldSpaceCameraPos;
-                half3 d = camPos - o.positionWS;
-                half distSqr = dot(d, d);
-
-                half distFog = saturate(
-                    (distSqr - _FogStart * _FogStart) /
-                    max(0.001, (_FogEnd * _FogEnd - _FogStart * _FogStart))
-                );
-
-                half heightFog = saturate((_FogHeight - o.positionWS.y) * _FogDensity);
-
-                o.fogFactor = distFog * heightFog;
+     
                 float3 tangentWS = TransformObjectToWorldDir(v.tangentOS.xyz);
                 o.tangentWS = normalize(tangentWS);
                 float3 bitangentWS = cross(o.normalWS, o.tangentWS.xyz) * v.tangentOS.w;
@@ -230,6 +218,7 @@ Shader "Unlit/SimpleLightShaderWind"
                 half3 normalWS = normalize(mul(normalTS, tbn));
 
                 half3 viewDir = normalize(GetWorldSpaceViewDir(v.positionWS));
+                Light mainLight = GetMainLight(TransformWorldToShadowCoord(v.positionWS));
 
                 half3 ARM = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, v.uv).rgb;
                 half metalMask = ARM.b;
@@ -311,7 +300,21 @@ Shader "Unlit/SimpleLightShaderWind"
                 half matcapPower = metalMask * _MatcapIntensity;
 
                 col.rgb += matcap * metalMask * _MatcapIntensity * (1.0h + fresnel);
-                col.rgb = lerp(col.rgb, _FogColor.rgb, v.fogFactor);
+                                half3 camPos = _WorldSpaceCameraPos;
+                half dist = length(camPos - v.positionWS);
+
+half fogFactor = saturate((dist - _FogStart) / (_FogEnd - _FogStart));
+
+// 2. ”лучшаем расчет €ркости тумана
+// „тобы туман не "светилс€" сам по себе, берем €ркость из MainLight
+half3 adjustedFogColor = _FogColor.rgb * mainLight.color;
+
+// 3. ѕлавный порог: используем smoothstep вместо линейного затухани€, 
+// чтобы у камеры туман гарантированно был нулевым
+fogFactor = smoothstep(0.0, 1.0, fogFactor);
+
+// 4. ‘инальное наложение
+col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
                 return half4(col.rgb, col.a);
             }
             ENDHLSL

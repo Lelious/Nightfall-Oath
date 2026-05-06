@@ -2,7 +2,12 @@
 
 public interface IMapObject
 {
+    public ushort Id();
+    public bool Active();
+    public bool PersistentObject();
     public Vector3 Position();
+    public Vector3 Scale();
+    public Transform Transform();
     public Quaternion Rotation();
     public void SetActive(bool active);
     public void SetPosition(Vector3 position);

@@ -12,7 +12,7 @@ public class MeshBuilder : EditorWindow
     private GameObject previewObject;
     private Mesh currentMesh;
     private Material targetMaterial;
-    private bool isEditing = true;
+    private bool isEditing = false;
 
     [MenuItem("Tools/NavMesh Builder")]
     public static void ShowWindow() => GetWindow<MeshBuilder>("NavMesh Builder");

@@ -133,8 +133,8 @@ Material:
     - _DstBlendAlpha: 0
     - _EnvironmentReflections: 1
     - _Fade: 0
-    - _FogDensity: -1
-    - _FogEnd: 45
+    - _FogDensity: 1
+    - _FogEnd: 70
     - _FogHeight: 2
     - _FogStart: 10
     - _GlossMapScale: 0

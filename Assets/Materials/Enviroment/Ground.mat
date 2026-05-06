@@ -138,10 +138,10 @@ Material:
     - _EdgePadding: 0.00802
     - _EnvironmentReflections: 1
     - _Fade: 0
-    - _FogDensity: -1
-    - _FogEnd: 50
+    - _FogDensity: 1
+    - _FogEnd: 70
     - _FogHeight: 2
-    - _FogStart: 0
+    - _FogStart: 10
     - _GlossMapScale: 0
     - _Glossiness: 0
     - _GlossyReflections: 0

@@ -1,20 +1,22 @@
-﻿using System.Collections.Generic;
+﻿using LeliousExtentions;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Unity.AI.Navigation;
 using UnityEditor;
 using UnityEngine;
 
-[ExecuteAlways]
+[ExecuteInEditMode]
 public class MeshCopier : MonoBehaviour
 {
-    [SerializeField] private Terrain _terrain;
-    [SerializeField] private GameObject _copyObject;
+    [SerializeField] private Terrain _terrain;    
     [SerializeField] private Texture2D _heightMap;
     [SerializeField] private Vector3 _startPos;
     [SerializeField] private Vector3 _startPosVertex;
     [SerializeField] private NavMeshSurface _navSurf;
     [SerializeField] private GameObject _navQuad;
+    [SerializeField] private Vector2Int _buildQuadSize;
+    [SerializeField] private List<GameObject> _chunks;
 
     public float minHeight, maxHeight;
     public int chunkX;
@@ -26,7 +28,10 @@ public class MeshCopier : MonoBehaviour
     [SerializeField] private int highestX, highestZ = 0;
     private const float _distPervertex = 1.5873f;
     private string _savePathSplat = "Assets/Chunks/Splatmaps/";
-    private string _saveHeightPath = "Assets/StreamingAssets/";
+    private string _saveHeightPath = "Assets/Chunks/HeightMap/";
+    private string _saveChunkDataPath = "Assets/Chunks/ChunkData/";
+
+
     private Texture2D _heightTex;
 
     [ContextMenu("SaveSplatMap")]
@@ -77,40 +82,40 @@ public class MeshCopier : MonoBehaviour
         Debug.Log("Splatmaps exported!");
     }
 
-    [ContextMenu("GenerateNavQuads")]
-    public void GenerateNavQuads()
-    {
-        var mesh = _copyObject.GetComponent<MeshFilter>().sharedMesh;
-        var verts = mesh.vertices;
-        var gridSize = 64;
+    //[ContextMenu("GenerateNavQuads")]
+    //public void GenerateNavQuads()
+    //{
+    //    var mesh = _copyObject.GetComponent<MeshFilter>().sharedMesh;
+    //    var verts = mesh.vertices;
+    //    var gridSize = 64;
 
-        for (int z = 0; z < gridSize; z ++)
-        {
-            for (int x = 0; x < gridSize; x++)
-            {
-                int i0 = z * gridSize + x;
+    //    for (int z = 0; z < gridSize; z ++)
+    //    {
+    //        for (int x = 0; x < gridSize; x++)
+    //        {
+    //            int i0 = z * gridSize + x;
 
-                Vector3 p0 = _copyObject.transform.TransformPoint(verts[i0]);
+    //            Vector3 p0 = _copyObject.transform.TransformPoint(verts[i0]);
 
-                Vector3 normal = _copyObject.transform.TransformDirection(mesh.normals[i0]).normalized;
+    //            Vector3 normal = _copyObject.transform.TransformDirection(mesh.normals[i0]).normalized;
 
-                Vector3 baseForward = Vector3.forward;
-                Vector3 forward = Vector3.ProjectOnPlane(baseForward, normal).normalized;
+    //            Vector3 baseForward = Vector3.forward;
+    //            Vector3 forward = Vector3.ProjectOnPlane(baseForward, normal).normalized;
 
-                if (forward.sqrMagnitude < 0.001f)
-                {
-                    baseForward = Vector3.right;
-                    forward = Vector3.ProjectOnPlane(baseForward, normal).normalized;
-                }
+    //            if (forward.sqrMagnitude < 0.001f)
+    //            {
+    //                baseForward = Vector3.right;
+    //                forward = Vector3.ProjectOnPlane(baseForward, normal).normalized;
+    //            }
 
-                Quaternion rot = Quaternion.LookRotation(forward, normal);
+    //            Quaternion rot = Quaternion.LookRotation(forward, normal);
 
-                GameObject quad = Instantiate(_navQuad);
-                quad.transform.position = p0;
-                quad.transform.rotation = rot;
-            }
-        }
-    }
+    //            GameObject quad = Instantiate(_navQuad);
+    //            quad.transform.position = p0;
+    //            quad.transform.rotation = rot;
+    //        }
+    //    }
+    //}
 
     [ContextMenu("ConvertTrees")]
     public void ConvertTrees()
@@ -132,24 +137,52 @@ public class MeshCopier : MonoBehaviour
         }
     }
 
-    [ContextMenu("ConvertRocks")]
-    public void ConvertRocks()
+    [ContextMenu("BakeChunkObjects")]
+    public void BakeChunkObjects()
     {
-        var data = _terrain.terrainData;
-
-        var rock = data.treeInstances;
-
-        foreach (var tree in data.treeInstances)
+        var allObjects = FindObjectsByType<MapEnviromentObject>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None
+        );
+        var chunkMap = new Dictionary<Vector2Int, List<IMapObject>>();
+        if (!Directory.Exists(_saveChunkDataPath))
+            Directory.CreateDirectory(_saveChunkDataPath);
+        foreach (var obj in allObjects)
         {
-            var prefab = data.treePrototypes[tree.prototypeIndex].prefab;
+            if (obj is IMapObject mapObj)
+            {
+                Vector3 pos = mapObj.Position() - _startPos;
+                int chunkX = Mathf.FloorToInt((pos.x + 50f) / 100f);
+                int chunkZ = Mathf.FloorToInt((pos.z + 50f) / 100f);
+                Vector2Int coord = new Vector2Int(chunkX, chunkZ);
 
-            Vector3 pos = Vector3.Scale(tree.position, data.size) + _terrain.transform.position;
+                if (!chunkMap.ContainsKey(coord))
+                    chunkMap[coord] = new List<IMapObject>();
 
-            var go = Instantiate(prefab, pos, Quaternion.Euler(0, tree.rotation * Mathf.Rad2Deg, 0));
+                Debug.Log($"Find map object ID : {mapObj.Id()}");
 
-            float scale = tree.widthScale;
-            go.transform.localScale = Vector3.one * scale;
+                chunkMap[coord].Add(mapObj);
+            }
         }
+
+        for (int z = 0; z < chunksPerSide; z++)
+        {
+            for (int x = 0; x < chunksPerSide; x++)
+            {
+                Vector2Int currentCoord = new Vector2Int(x, z);
+
+                if (chunkMap.TryGetValue(currentCoord, out var objectsInChunk))
+                {
+                    byte[] data = BinaryChunkSerializer.Serialize(objectsInChunk.ToArray());
+
+                    string path = Path.Combine(_saveChunkDataPath, $"Chunk_{x}_{z}.bytes");
+                    File.WriteAllBytes(path, data);
+                }
+            }
+        }
+#if UNITY_EDITOR
+        UnityEditor.AssetDatabase.Refresh();
+#endif
     }
 
     [ContextMenu("Generate Heightmap")]
@@ -168,7 +201,7 @@ public class MeshCopier : MonoBehaviour
                 heights[x, z] = (ushort)(Y / 300f * 65535f);
             }
         }
-        HeightmapSerializer.Save($"{_saveHeightPath}/heightmap.bin", heights);
+        HeightmapSerializer.Save($"{_saveHeightPath}/heightmap.bytes", heights);
 
 #if UNITY_EDITOR
         UnityEditor.AssetDatabase.Refresh();
@@ -180,28 +213,36 @@ public class MeshCopier : MonoBehaviour
     [ContextMenu("GenerateChunk")]
     public void GenerateChunk()
     {
-        _copyObject.transform.position = _startPos;
-        var mf = _copyObject.GetComponent<MeshFilter>();
+        int width = _buildQuadSize.x;
 
-        Mesh mesh = Instantiate(mf.sharedMesh);
-        mf.sharedMesh = mesh;
-
-        var verts = mesh.vertices;
-
-        for (int i = 0; i < verts.Length; i++)
+        for (int z = 0; z < _buildQuadSize.y; z++)
         {
-            Vector3 v = verts[i];
-            Vector3 worldPos = mf.transform.TransformPoint(v);
-            float worldHeight = _terrain.SampleHeight(worldPos);
+            for (int x = 0; x < width; x++)
+            {
+                int index = z * width + x;
+                var mf = _chunks[index].GetComponent<MeshFilter>();
+                _chunks[index].transform.position = new Vector3(_startPos.x + 100f * x, 0f, _startPos.z + 100f * z);
+                Mesh mesh = Instantiate(mf.sharedMesh);
+                mf.sharedMesh = mesh;
 
-            v.y = worldHeight - mf.transform.position.y;
+                var verts = mesh.vertices;
 
-            verts[i] = v;
+                for (int i = 0; i < verts.Length; i++)
+                {
+                    Vector3 v = verts[i];
+                    Vector3 worldPos = mf.transform.TransformPoint(v);
+                    float worldHeight = _terrain.SampleHeight(worldPos);
+
+                    v.y = worldHeight - mf.transform.position.y;
+
+                    verts[i] = v;
+                }
+
+                mf.sharedMesh.vertices = verts;
+                mf.sharedMesh.RecalculateNormals();
+                mf.sharedMesh.RecalculateBounds();
+            }
         }
-
-        mf.sharedMesh.vertices = verts;
-        mf.sharedMesh.RecalculateNormals();
-        mf.sharedMesh.RecalculateBounds();
     }
 
     private float GetLayer(float[,,] maps, int x, int y, int layer)
@@ -210,5 +251,5 @@ public class MeshCopier : MonoBehaviour
             return 0f;
 
         return maps[y, x, layer];
-    }
+    }   
 }

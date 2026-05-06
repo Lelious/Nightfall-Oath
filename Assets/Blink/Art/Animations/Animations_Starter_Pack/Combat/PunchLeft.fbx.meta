@@ -8,7 +8,7 @@ AssetOrigin:
   assetPath: Assets/Blink/Art/Animations/Animations_Starter_Pack/Combat/PunchLeft.fbx
   uploadId: 489767
 ModelImporter:
-  serializedVersion: 22200
+  serializedVersion: 24200
   internalIDToNameTable:
   - first:
       74: 416870459326255563
@@ -75,7 +75,7 @@ ModelImporter:
         floatParameter: 0
         intParameter: 0
         messageOptions: 0
-      - time: 0.75630254
+      - time: 0.92077625
         functionName: AttackExit
         data: 
         objectReferenceParameter: {instanceID: 0}
@@ -112,6 +112,9 @@ ModelImporter:
     maxBonesPerVertex: 4
     minBoneWeight: 0.001
     optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
     meshOptimizationFlags: -1
     indexFormat: 0
     secondaryUVAngleDistortion: 8

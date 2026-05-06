@@ -39,7 +39,7 @@ public class MovementComponent : MonoBehaviour
 
     public void MoveToPoint(Vector3 point)
     {
-        if (!_agent.isActiveAndEnabled || IsLockedMovement) return;
+        if (!_agent.isActiveAndEnabled || IsLockedMovement || !_agent.isOnNavMesh) return;
         _agent.isStopped = false;
         _agent.SetDestination(point);
     }

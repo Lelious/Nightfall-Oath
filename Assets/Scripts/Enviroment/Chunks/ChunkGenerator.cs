@@ -1,15 +1,16 @@
 ﻿using Cysharp.Threading.Tasks;
 using LeliousExtentions;
 using System.Collections.Generic;
-using System.IO;
 using Unity.AI.Navigation;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 using UnityEngine.AI;
-using UnityEngine.Networking;
 using UnityEngine.Rendering;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using Zenject;
 
 public class ChunkGenerator : MonoBehaviour
 {
@@ -20,14 +21,15 @@ public class ChunkGenerator : MonoBehaviour
     [SerializeField] private Vector3 _startCoordinate;
     [SerializeField] private int _tileResolution = 64;
     [SerializeField] private NavMeshSurface _surf;
-    [SerializeField] private List<GameObject> _trees;
-    [SerializeField] private List<GameObject> _rocks;
     [SerializeField] private float _detailDist = 10f;
+    [SerializeField] private float _zOffset;
     [SerializeField] private float _distanceToRebuild = 120f;
-   
+    [SerializeField] private ObjectDatabase _dataBase;
+
+    [Inject]
+    private PoolService _poolService;
     private int _sqrtLength;
     private float _distPervertex;
-    private NavMeshData _navData;
     private bool _chunksRebuild;
     private Vector2 _lastRebuildedPos;
     private NativeArray<ushort> _heightDataNative;
@@ -53,16 +55,24 @@ public class ChunkGenerator : MonoBehaviour
 
     private async UniTaskVoid Init()
     {
-        string path = Path.Combine(Application.streamingAssetsPath, "heightmap.bin");
+        _poolService.InitializePool(_dataBase, 30);
 
-        UnityWebRequest www = UnityWebRequest.Get(path);
-        await www.SendWebRequest();
+        var handle = Addressables.LoadAssetAsync<TextAsset>("heightmap");
+        await handle.Task;
 
-        _heightDataNative = HeightmapSerializer.Load(www.downloadHandler.data);
-        _navData = new NavMeshData();
-        NavMesh.AddNavMeshData(_navData);
+        if (handle.Status != AsyncOperationStatus.Succeeded)
+        {
+            Debug.LogError("Failed to load heightmap");
+            return;
+        }
+
+        var bytes = handle.Result.bytes;
+        _heightDataNative = HeightmapSerializer.Load(bytes);
+
         _sqrtLength = Mathf.FloorToInt(Mathf.Sqrt(_heightDataNative.Length));
         _distPervertex = _chunkSize / (_tileResolution - 1);
+
+        Addressables.Release(handle);
 
         foreach (var chunk in _chunks)
         {
@@ -75,7 +85,7 @@ public class ChunkGenerator : MonoBehaviour
 
         var centerChunk = GetChunkCoord(_hero.transform.position);
         await UpdateChunks(centerChunk);
-
+        await UniTask.Delay(100);
         NavMeshHit hit;
 
         if (NavMesh.SamplePosition(
@@ -88,7 +98,7 @@ public class ChunkGenerator : MonoBehaviour
             _hero.GetComponent<NavMeshAgent>().Warp(hit.position);
         }
 
-        AssignTreeAndRock().Forget();
+        AssignMapObjects().Forget();
         _inited = true;
         Debug.Log($"{_heightDataNative.Length}");
     }
@@ -107,7 +117,6 @@ public class ChunkGenerator : MonoBehaviour
                 spawnPoints.Add(point);
             }
         }
-
         return spawnPoints;
     }
 
@@ -159,6 +168,7 @@ public class ChunkGenerator : MonoBehaviour
         }
 
         await DelayedChunkRebuild(chunksToMove);
+        _poolService.RemoveNotPersistantFarObjects(new Vector2(_hero.transform.position.x, _hero.transform.position.z), _detailDist * 3f);
     }
 
     private async UniTask DelayedChunkRebuild(List<Chunk> chunks)
@@ -188,46 +198,44 @@ public class ChunkGenerator : MonoBehaviour
         return new Vector2(_origin.x + gridPos.x * _chunkSize, _origin.z + gridPos.y * _chunkSize);
     }
 
-    private async UniTask AssignTreeAndRock()
+    private async UniTask AssignMapObjects()
     {
+        List<IMapObject> objToRemove = new();
+
         while (true)
         {
-            foreach (var item in _trees)
+            objToRemove.Clear();
+
+            foreach (var item in _chunks)
             {
-                if(LeliousMathematic.FlatDistanceGreaterThan(new Vector2(_hero.transform.position.x, _hero.transform.position.z), 
-                    new Vector2(item.transform.position.x, item.transform.position.z), _detailDist))
+                var info = item.GetChunkObjectsInfoList();
+
+                if (info == null || info.Count == 0) break;
+
+                foreach (var item2 in info)
                 {
-                    if(item.activeInHierarchy)
+                    if (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(_hero.transform.position.x, _hero.transform.position.z + _zOffset),
+                    new Vector2(item2.Position.x, item2.Position.z), _detailDist))
                     {
-                        item.SetActive(false);
+                        if(item2.MapObject != null)
+                        {
+                            objToRemove.Add(item2.MapObject);
+                            item2.MapObject = null;
+                        }
                     }
-                }
-                else
-                {
-                    if (!item.activeInHierarchy)
+                    else
                     {
-                        item.SetActive(true);
+                        if(item2.MapObject == null)
+                        {
+                            item2.SetMapObject(_poolService.GetObjectFromPool(item2.Id));
+                        }
                     }
-                }            
+                }               
             }
 
-            foreach (var item in _rocks)
+            foreach (var item in objToRemove)
             {
-                if (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(_hero.transform.position.x, _hero.transform.position.z),
-                    new Vector2(item.transform.position.x, item.transform.position.z), _detailDist))
-                {
-                    if (item.activeInHierarchy)
-                    {
-                        item.SetActive(false);
-                    }
-                }
-                else
-                {
-                    if (!item.activeInHierarchy)
-                    {
-                        item.SetActive(true);
-                    }
-                }
+                _poolService.ReturnToPool(item);
             }
             await UniTask.Yield();
         }
@@ -246,6 +254,8 @@ public class ChunkGenerator : MonoBehaviour
 
     private async UniTask InitializeChunk(Chunk chunk, Vector2Int chunkPos)
     {
+        chunk.transform.position = new Vector3(_origin.x + 100f * chunkPos.x, 0f, _origin.z + 100f * chunkPos.y);
+
         var job = new ChunkHeightJob
         {
             vertices = chunk.Vertices,
@@ -259,8 +269,31 @@ public class ChunkGenerator : MonoBehaviour
             invStep = 1f / _distPervertex
         };
 
-        var handle = job.Schedule(chunk.Vertices.Length, 64);
-        await handle.ToUniTask(PlayerLoopTiming.Update);
+        var locationsHandle = Addressables.LoadResourceLocationsAsync($"Chunk_{chunkPos.x}_{chunkPos.y}");
+        await locationsHandle.Task;
+
+        if (locationsHandle.Result == null || locationsHandle.Result.Count == 0)
+        {
+            Debug.LogWarning($"Asset not found: {$"Chunk_{chunkPos.x}_{chunkPos.y}"}");
+            Addressables.Release(locationsHandle);
+        }
+
+        var handle = Addressables.LoadAssetAsync<TextAsset>($"Chunk_{chunkPos.x}_{chunkPos.y}");
+        await handle.Task;
+
+        if (handle.Status != AsyncOperationStatus.Succeeded)
+        {
+            Debug.LogError("Failed to load chunk");
+        }
+        else
+        {
+            var bytes = handle.Result.bytes;
+            chunk.InitializeChunk(BinaryChunkSerializer.Deserialize(bytes));
+            Addressables.Release(handle);
+        }      
+
+        var jobHandle = job.Schedule(chunk.Vertices.Length, 64);
+        await jobHandle.ToUniTask(PlayerLoopTiming.Update);
 
         ApplyMeshData(chunk);
     }

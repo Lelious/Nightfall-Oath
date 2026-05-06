@@ -8,7 +8,7 @@ Shader "Unlit/SimpleLightShader"
         _AORoughnessMetallicMap ("AO(R) Rough(G) Metal(B)", 2D) = "white" {}
         _DissolveTex ("DissolveTex", 2D) = "black" {}
         _MatcapTex ("MatcapTex", 2D) = "black" {}
-
+        _Offset("Offset", Vector) = (0,0,0,0)
         _BaseColor ("Base Color", Color) = (1,1,1,1)
         _NormalStrength ("Normal Strength", Range(0,2)) = 1
         _HeightScale ("Height Scale", Range(0,0.05)) = 0.005
@@ -89,7 +89,6 @@ Shader "Unlit/SimpleLightShader"
                 half3 tangentWS   : TEXCOORD3;
                 half3 viewDirTS   : TEXCOORD4;
                 half3 bitangentWS : TEXCOORD6;
-                half fogFactor : TEXCOORD7;
             };
 
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
@@ -129,6 +128,7 @@ Shader "Unlit/SimpleLightShader"
                 half _MaxRadius;
                 half _MinRadius;
                 half _MaxDistance;
+                half4 _Offset;
             CBUFFER_END
 
             Varyings Vertex(Attributes v)
@@ -139,18 +139,6 @@ Shader "Unlit/SimpleLightShader"
                 o.positionCS = TransformWorldToHClip(o.positionWS);
 
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
-                half3 camPos = _WorldSpaceCameraPos;
-                half3 d = camPos - o.positionWS;
-                half distSqr = dot(d, d);
-
-                half distFog = saturate(
-                    (distSqr - _FogStart * _FogStart) /
-                    max(0.001, (_FogEnd * _FogEnd - _FogStart * _FogStart))
-                );
-
-                half heightFog = saturate((_FogHeight - o.positionWS.y) * _FogDensity);
-
-                o.fogFactor = distFog * heightFog;
                 float3 tangentWS = TransformObjectToWorldDir(v.tangentOS.xyz);
                 o.tangentWS = normalize(tangentWS);
                 float3 bitangentWS = cross(o.normalWS, o.tangentWS.xyz) * v.tangentOS.w;
@@ -188,7 +176,7 @@ Shader "Unlit/SimpleLightShader"
                 half3 posVS = mul(unity_MatrixV, float4(v.positionWS, 1.0)).xyz;
 
                 half depth = -posVS.z;
-                half distFromCenter = length(posVS.xy);
+                half distFromCenter = length(posVS.xy + _Offset);
                 half t = saturate(depth / max(0.001, _MaxDistance));
                 half radius = lerp(_MaxRadius, _MinRadius, t);
                 half coneMask = smoothstep(radius + _Softness, radius, distFromCenter);
@@ -226,9 +214,12 @@ Shader "Unlit/SimpleLightShader"
 
                 half3 viewDir = normalize(GetWorldSpaceViewDir(v.positionWS));
 
+
+                Light mainLight = GetMainLight(TransformWorldToShadowCoord(v.positionWS));
+
                 half3 ARM = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, v.uv).rgb;
                 half metalMask = ARM.b;
-                half smoothness = 1 - ARM.g;
+                half smoothness = 1 - ARM.g;               
 
                 InputData lighting = (InputData)0;
                 lighting.positionWS = v.positionWS;
@@ -305,10 +296,17 @@ Shader "Unlit/SimpleLightShader"
 
                 half matcapPower = metalMask * _MatcapIntensity;
 
-                col.rgb += matcap * metalMask * _MatcapIntensity * (1.0h + fresnel);
-                col.rgb = lerp(col.rgb, _FogColor.rgb, v.fogFactor);
+                col.rgb += matcap * metalMask * _MatcapIntensity * (1.0h + fresnel);                
                 col.rgb += edge * _DissolveColor.rgb * _EdgeIntensity;
-                return half4(col.rgb, col.a);
+
+                half3 camPos = _WorldSpaceCameraPos;
+                half dist = length(camPos - v.positionWS);
+
+                half fogFactor = saturate((dist - _FogStart) / (_FogEnd - _FogStart));
+                half3 adjustedFogColor = _FogColor.rgb * mainLight.color;
+                fogFactor = smoothstep(0.0, 1.0, fogFactor);
+                col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
+                return half4(col.rgb, 1);
             }
             ENDHLSL
         }
