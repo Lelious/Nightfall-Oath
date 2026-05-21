@@ -48,6 +48,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapEnviromentObject
   ID: 15
   _persistentObject: 0
+  _navigationMeshes:
+  - {fileID: 847296191131210952}
 --- !u!1 &8539313013912278683
 GameObject:
   m_ObjectHideFlags: 0

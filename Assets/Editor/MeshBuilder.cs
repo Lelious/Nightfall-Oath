@@ -7,12 +7,19 @@ public class MeshBuilder : EditorWindow
 {
     private float fixedStep = 3f;
     private float thresholdY = 10f;
+    private float weldThreshold = 0.01f;
     private int rings = 3;
     private List<Vector3> points = new List<Vector3>();
     private GameObject previewObject;
     private Mesh currentMesh;
     private Material targetMaterial;
+    private Transform targetTransform;
     private bool isEditing = false;
+
+    [SerializeField] private List<MeshFilter> meshesToCombine = new();
+
+    private SerializedObject so;
+    private SerializedProperty meshesProperty;
 
     [MenuItem("Tools/NavMesh Builder")]
     public static void ShowWindow() => GetWindow<MeshBuilder>("NavMesh Builder");
@@ -20,6 +27,9 @@ public class MeshBuilder : EditorWindow
     private void OnEnable()
     {
         SceneView.duringSceneGui += OnSceneGUI;
+
+        so = new SerializedObject(this);
+        meshesProperty = so.FindProperty("meshesToCombine");
 
         if (targetMaterial == null)
         {
@@ -96,6 +106,25 @@ public class MeshBuilder : EditorWindow
 
     private void OnGUI()
     {
+        if (so == null || so.targetObject == null)
+        {
+            so = new SerializedObject(this);
+            meshesProperty = so.FindProperty("meshesToCombine");
+        }
+
+        so.Update();
+
+        if (meshesProperty != null)
+        {
+            EditorGUILayout.PropertyField(meshesProperty, new GUIContent("Meshes To Combine"), true);
+        }
+        else
+        {
+            EditorGUILayout.HelpBox("Property 'meshesToCombine' not found!", MessageType.Error);
+        }
+
+        so.ApplyModifiedProperties();
+
         GUI.color = isEditing ? Color.green : Color.gray;
         if (GUILayout.Button(isEditing ? "Is Editing Mode : YES" : "Is Editing Mode : NO", GUILayout.Height(30)))
         {
@@ -107,7 +136,9 @@ public class MeshBuilder : EditorWindow
         fixedStep = EditorGUILayout.Slider("Grid Step", fixedStep, 0.5f, 10f);
         rings = EditorGUILayout.IntSlider("Rings Count (Radial)", rings, 1, 10);
         thresholdY = EditorGUILayout.Slider("Raycast Y Threshold", thresholdY, 0.1f, 100f);
+        weldThreshold = EditorGUILayout.Slider("Vertices Weld Threshold", weldThreshold, 0.0001f, 3f);
         targetMaterial = (Material)EditorGUILayout.ObjectField("Material", targetMaterial, typeof(Material), false);
+        targetTransform = (Transform)EditorGUILayout.ObjectField("TargetChunk", targetTransform, typeof(Transform), true);
 
         EditorGUILayout.Space();
 
@@ -136,9 +167,100 @@ public class MeshBuilder : EditorWindow
         if (GUILayout.Button("Clear All", GUILayout.Height(30))) points.Clear();
         GUI.color = Color.white;
 
+        GUI.color = Color.cyan;
+        if (GUILayout.Button("Combine Meshes", GUILayout.Height(30))) CombineSelectedMeshes();
+        GUI.color = Color.white;
+
         GUI.enabled = (currentMesh != null);
         if (GUILayout.Button("Save as Asset", GUILayout.Height(30))) SaveMesh();
         GUI.enabled = true;
+    }
+
+    private void CombineSelectedMeshes()
+    {
+        CombineInstance[] combine = new CombineInstance[meshesToCombine.Count];
+        for (int i = 0; i < meshesToCombine.Count; i++)
+        {
+            if (meshesToCombine[i].sharedMesh == null) continue;
+            combine[i].mesh = meshesToCombine[i].sharedMesh;
+            combine[i].transform = targetTransform.worldToLocalMatrix * meshesToCombine[i].transform.localToWorldMatrix;
+        }
+
+        Mesh rawCombinedMesh = new Mesh();
+        rawCombinedMesh.indexFormat = UnityEngine.Rendering.IndexFormat.UInt32;
+        rawCombinedMesh.CombineMeshes(combine, true, true);
+
+        // Выполняем сварку вершин
+        Mesh weldedMesh = WeldMesh(rawCombinedMesh, weldThreshold);
+
+        GameObject result = new GameObject("CombinedMesh_Welded");
+        result.transform.position = targetTransform.position;
+        result.transform.rotation = targetTransform.rotation;
+
+        result.AddComponent<MeshFilter>().sharedMesh = weldedMesh;
+        result.AddComponent<MeshRenderer>().sharedMaterial = meshesToCombine[0].GetComponent<MeshRenderer>().sharedMaterial;
+
+        currentMesh = weldedMesh;
+        UpdatePreview();
+    }
+
+    private Mesh WeldMesh(Mesh mesh, float threshold)
+    {
+        Vector3[] oldVertices = mesh.vertices;
+        Vector3[] oldNormals = mesh.normals;
+        Vector2[] oldUV = mesh.uv;
+        int[] oldIndices = mesh.GetIndices(0);
+
+        List<Vector3> newVertices = new List<Vector3>();
+        List<Vector3> newNormals = new List<Vector3>();
+        List<Vector2> newUVs = new List<Vector2>();
+        int[] newIndices = new int[oldIndices.Length];
+
+        Dictionary<Vector3Int, int> vertexMap = new Dictionary<Vector3Int, int>();
+
+        float invThreshold = 1f / threshold;
+
+        for (int i = 0; i < oldVertices.Length; i++)
+        {
+            Vector3 v = oldVertices[i];
+            Vector3Int key = new Vector3Int(
+                Mathf.RoundToInt(v.x * invThreshold),
+                Mathf.RoundToInt(v.y * invThreshold),
+                Mathf.RoundToInt(v.z * invThreshold)
+            );
+
+            if (!vertexMap.TryGetValue(key, out int index))
+            {
+                index = newVertices.Count;
+                vertexMap.Add(key, index);
+                newVertices.Add(v);
+                if (oldNormals.Length > 0) newNormals.Add(oldNormals[i]);
+                if (oldUV.Length > 0) newUVs.Add(oldUV[i]);
+            }
+        }
+
+        for (int i = 0; i < oldIndices.Length; i++)
+        {
+            Vector3 v = oldVertices[oldIndices[i]];
+            Vector3Int key = new Vector3Int(
+                Mathf.RoundToInt(v.x * invThreshold),
+                Mathf.RoundToInt(v.y * invThreshold),
+                Mathf.RoundToInt(v.z * invThreshold)
+            );
+            newIndices[i] = vertexMap[key];
+        }
+
+        Mesh newMesh = new Mesh();
+        newMesh.indexFormat = mesh.indexFormat;
+        newMesh.vertices = newVertices.ToArray();
+        if (newNormals.Count > 0) newMesh.normals = newNormals.ToArray();
+        if (newUVs.Count > 0) newMesh.uv = newUVs.ToArray();
+        newMesh.triangles = newIndices;
+
+        newMesh.RecalculateNormals();
+        newMesh.RecalculateBounds();
+
+        return newMesh;
     }
 
     private void GenerateMesh()
@@ -224,7 +346,7 @@ public class MeshBuilder : EditorWindow
                 if (Physics.Raycast(worldPos + Vector3.up * thresholdY, Vector3.down, out RaycastHit hit))
                     worldPos = hit.point;
 
-                verts.Add(worldPos + Vector3.up * 0.02f);
+                verts.Add(worldPos - targetTransform.position + Vector3.up * 0.02f);
                 nodes[ix, iz] = verts.Count - 1;
             }
         }
@@ -299,9 +421,9 @@ public class MeshBuilder : EditorWindow
     
     private bool IsAnyPointInOrOnPoly(List<Vector2> poly, int i1, int i2, int i3, List<Vector3> v)
     {
-        Vector2 p1 = new Vector2(v[i1].x, v[i1].z);
-        Vector2 p2 = new Vector2(v[i2].x, v[i2].z);
-        Vector2 p3 = new Vector2(v[i3].x, v[i3].z);
+        Vector2 p1 = new Vector2(v[i1].x + targetTransform.position.x, v[i1].z + targetTransform.position.z);
+        Vector2 p2 = new Vector2(v[i2].x + targetTransform.position.x, v[i2].z + targetTransform.position.z);
+        Vector2 p3 = new Vector2(v[i3].x + targetTransform.position.x, v[i3].z + targetTransform.position.z);
 
         Vector2 center = (p1 + p2 + p3) / 3f;
         return IsPointInPolygon(poly, center);
@@ -346,11 +468,18 @@ public class MeshBuilder : EditorWindow
     {
         if (points.Count < 3) return;
 
+        Vector3 localCenter = Vector3.zero;
+        foreach (var p in points) localCenter += p;
+        localCenter /= points.Count;
+
+        Vector3 worldCenter = targetTransform.position;
+
         List<Vector3> contour = new List<Vector3>();
         for (int i = 0; i < points.Count; i++)
         {
-            Vector3 start = points[i];
-            Vector3 end = points[(i + 1) % points.Count];
+            Vector3 start = (points[i]);
+            Vector3 end = (points[(i + 1) % points.Count]);
+
             float dist = Vector3.Distance(start, end);
             int divisions = Mathf.Max(1, Mathf.RoundToInt(dist / fixedStep));
 
@@ -360,12 +489,8 @@ public class MeshBuilder : EditorWindow
             }
         }
 
-        Vector3 center = Vector3.zero;
-        foreach (var p in contour) center += p;
-        center /= contour.Count;
-
-        if (Physics.Raycast(center + Vector3.up * thresholdY, Vector3.down, out RaycastHit hitCenter))
-            center = hitCenter.point;
+        if (Physics.Raycast(worldCenter + Vector3.up * thresholdY, Vector3.down, out RaycastHit hitCenter))
+            worldCenter = hitCenter.point;
 
         List<Vector3> verts = new List<Vector3>();
         List<int> tris = new List<int>();
@@ -376,12 +501,12 @@ public class MeshBuilder : EditorWindow
             float t = (float)r / rings;
             for (int i = 0; i < ptsCount; i++)
             {
-                Vector3 pos = Vector3.Lerp(contour[i], center, t);
+                Vector3 pos = Vector3.Lerp(contour[i], localCenter, t);
 
                 if (Physics.Raycast(pos + Vector3.up * thresholdY, Vector3.down, out RaycastHit hit))
                     pos = hit.point;
 
-                verts.Add(pos + Vector3.up * 0.02f);
+                verts.Add(pos - targetTransform.position + Vector3.up * 0.02f);
             }
         }
 
@@ -439,6 +564,8 @@ public class MeshBuilder : EditorWindow
             previewObject.AddComponent<MeshFilter>();
             previewObject.AddComponent<MeshRenderer>();
         }
+
+        previewObject.transform.position = targetTransform.position;
         previewObject.GetComponent<MeshFilter>().sharedMesh = currentMesh;
         previewObject.GetComponent<MeshRenderer>().sharedMaterial = targetMaterial;
         previewObject.layer = LayerMask.NameToLayer("WalkGround");
@@ -462,7 +589,8 @@ public class MeshBuilder : EditorWindow
         string folderPath = "Assets/GeneratedMeshes";
         if (!AssetDatabase.IsValidFolder(folderPath)) AssetDatabase.CreateFolder("Assets", "GeneratedMeshes");
 
-        string path = EditorUtility.SaveFilePanelInProject("Save Mesh", "NavMesh_Asset", "asset", "Type Asset Name", folderPath);
+        var coord = GetChunkCoord(targetTransform.position);
+        string path = EditorUtility.SaveFilePanelInProject("Save Mesh", $"ChunkNav_{coord.x}_{coord.y}", "asset", "Type Asset Name", folderPath);
 
         if (!string.IsNullOrEmpty(path))
         {
@@ -481,5 +609,12 @@ public class MeshBuilder : EditorWindow
 
             Debug.Log($"<color=green>Mesh saved sucessfully: {path}</color>");
         }
+    }
+
+    private Vector2Int GetChunkCoord(Vector3 pos)
+    {
+        int x = Mathf.FloorToInt((pos.x - (-950f)) / 100f);
+        int y = Mathf.FloorToInt((pos.z - (-950f)) / 100f);
+        return new Vector2Int(x, y);
     }
 }

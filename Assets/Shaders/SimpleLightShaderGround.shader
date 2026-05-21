@@ -247,13 +247,15 @@ Shader "Unlit/SimpleLightShaderGround"
 
                 half metalMask = saturate(ARM.b);
                 half smoothness = saturate(1.0h - ARM.g);
+                half3 ambient = SampleSH(normalWS);
+
                 Light mainLight = GetMainLight(TransformWorldToShadowCoord(v.positionWS));
                 InputData lighting = (InputData)0;
                 lighting.positionWS = v.positionWS;
                 lighting.shadowCoord = TransformWorldToShadowCoord(v.positionWS);
                 lighting.viewDirectionWS = viewDir;
                 lighting.normalWS = normalWS;
-                lighting.bakedGI = SampleSH(normalWS);
+                lighting.bakedGI = max(ambient, 0.15);
 
                 SurfaceData surface = (SurfaceData)0;
                 surface.albedo = color.rgb;
@@ -269,7 +271,7 @@ Shader "Unlit/SimpleLightShaderGround"
                 half specMul = lerp(0.2h, 2.5h, metalMask);
                 half diffMul = (1.0h - metalMask);
                 half mainLightIntensity = dot(_MainLightColor.rgb, half3(0.2126, 0.7152, 0.0722)); 
-                half additionalLightFactor = saturate(1.0 - mainLightIntensity / 2.2);
+                half additionalLightFactor = lerp(1.0, 0.1, saturate(mainLightIntensity));
 
                 for (int idx = 0; idx < _LightCount; idx++)
                 {
@@ -298,8 +300,8 @@ Shader "Unlit/SimpleLightShaderGround"
                     half3 H = normalize(L + viewDir);
                     half NdotH = saturate(dot(normalWS, H));
 
-                    half specular = NdotH * NdotH;
-                    specular *= specular;
+                    half specular = pow(NdotH, 32.0);
+                    specular *= smoothness;
 
                     diffuse *= diffMul;
                     specular *= specMul;
@@ -329,18 +331,10 @@ Shader "Unlit/SimpleLightShaderGround"
                 half3 camPos = _WorldSpaceCameraPos;
                 half dist = length(camPos - v.positionWS);
 
-half fogFactor = saturate((dist - _FogStart) / (_FogEnd - _FogStart));
-
-// 2. ”лучшаем расчет €ркости тумана
-// „тобы туман не "светилс€" сам по себе, берем €ркость из MainLight
-half3 adjustedFogColor = _FogColor.rgb * mainLight.color;
-
-// 3. ѕлавный порог: используем smoothstep вместо линейного затухани€, 
-// чтобы у камеры туман гарантированно был нулевым
-fogFactor = smoothstep(0.0, 1.0, fogFactor);
-
-// 4. ‘инальное наложение
-col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
+                half fogFactor = saturate((dist - _FogStart) / (_FogEnd - _FogStart));
+                half3 adjustedFogColor = _FogColor.rgb * mainLight.color;
+                fogFactor = smoothstep(0.0, 1.0, fogFactor);
+                col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
                 return half4(col.rgb, 1);
             }
             ENDHLSL

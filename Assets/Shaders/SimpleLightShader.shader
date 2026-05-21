@@ -220,13 +220,14 @@ Shader "Unlit/SimpleLightShader"
                 half3 ARM = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, v.uv).rgb;
                 half metalMask = ARM.b;
                 half smoothness = 1 - ARM.g;               
+                half3 ambient = SampleSH(normalWS);
 
                 InputData lighting = (InputData)0;
                 lighting.positionWS = v.positionWS;
                 lighting.shadowCoord = TransformWorldToShadowCoord(v.positionWS);
                 lighting.viewDirectionWS = viewDir;
                 lighting.normalWS = normalWS;
-                lighting.bakedGI = SampleSH(normalWS);
+                lighting.bakedGI = max(ambient, 0.15);
 
                 SurfaceData surface = (SurfaceData)0;
                 surface.albedo = color.rgb;
@@ -241,8 +242,9 @@ Shader "Unlit/SimpleLightShader"
 
                 half specMul = lerp(0.2h, 2.5h, metalMask);
                 half diffMul = (1.0h - metalMask);
-                half mainLightIntensity = dot(_MainLightColor.rgb, half3(0.2126, 0.7152, 0.0722)); 
-                half additionalLightFactor = saturate(1.0 - mainLightIntensity / 2.2);
+                half mainLightIntensity = dot(mainLight.color, half3(0.2126, 0.7152, 0.0722)); 
+                //half additionalLightFactor = saturate(1.0 - mainLightIntensity / 3.0);
+                half additionalLightFactor = lerp(1.0, 0.1, saturate(mainLightIntensity));
 
                 for (int idx = 0; idx < _LightCount; idx++)
                 {
@@ -271,8 +273,8 @@ Shader "Unlit/SimpleLightShader"
                     half3 H = normalize(L + viewDir);
                     half NdotH = saturate(dot(normalWS, H));
 
-                    half specular = NdotH * NdotH;
-                    specular *= specular;
+                    half specular = pow(NdotH, 32.0);
+                    specular *= smoothness;
 
                     diffuse *= diffMul;
                     specular *= specMul;

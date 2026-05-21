@@ -287,7 +287,7 @@ ModelImporter:
       name: GetHit
       takeName: Take 001
       internalID: 0
-      firstFrame: 0
+      firstFrame: 10
       lastFrame: 40
       wrapMode: 0
       orientationOffsetY: 0

@@ -140,6 +140,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapEnviromentObject
   ID: 16
   _persistentObject: 0
+  _navigationMeshes:
+  - {fileID: 2177541679806108731}
 --- !u!1 &8051841578705393834
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,13 +168,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8051841578705393834}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.16945352, y: 0.6865024, z: 0.16945359, w: 0.68650234}
+  m_LocalRotation: {x: 0.29243076, y: 0.64380455, z: 0.29243082, w: 0.6438045}
   m_LocalPosition: {x: 0.0549, y: -0.0001, z: -0}
   m_LocalScale: {x: 1.9238213, y: 1.9238213, z: 1.9238214}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 3081458426659739533}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: 48.857}
 --- !u!33 &2177541679806108731
 MeshFilter:
   m_ObjectHideFlags: 0

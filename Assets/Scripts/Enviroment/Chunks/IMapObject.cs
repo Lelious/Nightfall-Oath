@@ -1,9 +1,13 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
 
 public interface IMapObject
 {
     public ushort Id();
     public bool Active();
+    public bool HasNavigationMeshes();
+    public void FillNavSources(List<NavMeshBuildSource> targetList);
     public bool PersistentObject();
     public Vector3 Position();
     public Vector3 Scale();

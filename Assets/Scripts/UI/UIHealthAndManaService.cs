@@ -10,6 +10,7 @@ public class UIHealthAndManaService : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _expText;
     [SerializeField] private TextMeshProUGUI _healthText;
     [SerializeField] private TextMeshProUGUI _manaText;
+    [SerializeField] private Light _dirLight;
 
     private Material _hpMaterial;
     private Material _manaMaterial;
@@ -27,6 +28,16 @@ public class UIHealthAndManaService : MonoBehaviour
         _expMaterial = new Material(_expBar.material);
         _expBar.material = _expMaterial;
         Enemy.OnEnemyDeath += IncreaseExp;
+    }
+
+    public void SetDay()
+    {
+        _dirLight.intensity = 1.0f;
+    }
+
+    public void SetNight()
+    {
+        _dirLight.intensity = 0.1f;
     }
 
     public void UpdateHealth(float currentHealth, float maxHealth)

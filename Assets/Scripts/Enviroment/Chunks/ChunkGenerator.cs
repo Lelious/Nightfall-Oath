@@ -20,7 +20,6 @@ public class ChunkGenerator : MonoBehaviour
     [SerializeField] private Vector3 _origin = new Vector3(-950f, 0f, -950f);
     [SerializeField] private Vector3 _startCoordinate;
     [SerializeField] private int _tileResolution = 64;
-    [SerializeField] private NavMeshSurface _surf;
     [SerializeField] private float _detailDist = 10f;
     [SerializeField] private float _zOffset;
     [SerializeField] private float _distanceToRebuild = 120f;
@@ -28,9 +27,14 @@ public class ChunkGenerator : MonoBehaviour
 
     [Inject]
     private PoolService _poolService;
+    [SerializeField] private NavMeshBuilderService _navMeshBuilder;
+
+    private List<NavMeshBuildSource> _globalNavigationSourcesList;
+    private List<IMapObject> _activeObjects;
+    private HashSet<Chunk> _dirtyChunks;
     private int _sqrtLength;
     private float _distPervertex;
-    private bool _chunksRebuild;
+    public bool _chunksRebuild;
     private Vector2 _lastRebuildedPos;
     private NativeArray<ushort> _heightDataNative;
     private bool _inited;
@@ -40,25 +44,41 @@ public class ChunkGenerator : MonoBehaviour
         Init().Forget();
     }
 
-    private void Update()
+    private async UniTaskVoid UpdateFunc()
     {
-        if (!_inited) return;
-        if (_chunksRebuild) return;
-
-        if(LeliousMathematic.FlatDistanceGreaterThan(new Vector2(_hero.transform.position.x, _hero.transform.position.z), _lastRebuildedPos, _distanceToRebuild))
+        while (true)
         {
-            var centerChunk = GetChunkCoord(_hero.transform.position);
-            _lastRebuildedPos = GridToWorldPos(centerChunk);
-            UpdateChunks(centerChunk).Forget();
-        }
+            await UniTask.Delay(1000);
+
+            if (_inited && !_chunksRebuild)
+            {
+                var heroPos = new Vector2(_hero.transform.position.x, _hero.transform.position.z);
+                if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, _lastRebuildedPos, _distanceToRebuild))
+                {
+                    var centerChunk = GetChunkCoord(_hero.transform.position);
+                    _lastRebuildedPos = heroPos;
+                    Debug.Log($"Distance {Vector2.Distance(new Vector2(_hero.transform.position.x, _hero.transform.position.z), _lastRebuildedPos)}");
+                    UpdateChunks(centerChunk).Forget();
+                }
+            }
+
+            if(!_chunksRebuild)
+            {
+                FillGlobalNavigation();
+                await RebuildNavMesh(_hero.transform.position);
+            }
+        }       
     }
 
     private async UniTaskVoid Init()
     {
         _poolService.InitializePool(_dataBase, 30);
+        _globalNavigationSourcesList = new();
+        _dirtyChunks = new();
+        _activeObjects = new();
 
         var handle = Addressables.LoadAssetAsync<TextAsset>("heightmap");
-        await handle.Task;
+        await handle.ToUniTask();
 
         if (handle.Status != AsyncOperationStatus.Succeeded)
         {
@@ -84,8 +104,13 @@ public class ChunkGenerator : MonoBehaviour
         }
 
         var centerChunk = GetChunkCoord(_hero.transform.position);
+
         await UpdateChunks(centerChunk);
-        await UniTask.Delay(100);
+        await UniTask.Yield();
+        FillGlobalNavigation();
+        await RebuildNavMesh(_hero.transform.position);
+        await UniTask.Yield();
+
         NavMeshHit hit;
 
         if (NavMesh.SamplePosition(
@@ -100,7 +125,7 @@ public class ChunkGenerator : MonoBehaviour
 
         AssignMapObjects().Forget();
         _inited = true;
-        Debug.Log($"{_heightDataNative.Length}");
+        UpdateFunc().Forget();
     }
 
     private List<Vector2Int> GetSpawnDirections(Vector2Int center)
@@ -131,6 +156,8 @@ public class ChunkGenerator : MonoBehaviour
     {
         if (_chunksRebuild) return;
         _chunksRebuild = true;
+        _globalNavigationSourcesList.Clear();
+        _dirtyChunks.Clear();
 
         var gridPositions = GetSpawnDirections(centerChunk);
         var newPosSet = new HashSet<Vector2Int>(gridPositions);
@@ -167,35 +194,33 @@ public class ChunkGenerator : MonoBehaviour
             SetChunkToGridPosition(chunk, newPos);
         }
 
-        await DelayedChunkRebuild(chunksToMove);
+        await DelayedChunkRebuild(chunksToMove); 
+      
         _poolService.RemoveNotPersistantFarObjects(new Vector2(_hero.transform.position.x, _hero.transform.position.z), _detailDist * 3f);
+
+        if(chunksToMove.Count == 0)
+        {
+            _chunksRebuild = false;
+            return;
+        }
+        
+        _chunksRebuild = false;
     }
 
     private async UniTask DelayedChunkRebuild(List<Chunk> chunks)
     {
         await UniTask.Yield();
 
-        while (chunks.Count > 0)
+        foreach (var chunk in chunks)
         {
-            var chunk = chunks[0];
             await InitializeChunk(chunk, chunk.GridPosition);
-            chunks.Remove(chunk);
-            await UniTask.Delay(100);
-        }
-
-        await UniTask.Delay(100);
-        await RebuildNavMesh();
+            await UniTask.Yield();
+        }     
     }
 
-    private async UniTask RebuildNavMesh()
+    private async UniTask RebuildNavMesh(Vector3 chunkPos)
     {
-        await _surf.UpdateNavMesh(_surf.navMeshData);
-        _chunksRebuild = false;
-    }
-
-    private Vector2 GridToWorldPos(Vector2Int gridPos)
-    {
-        return new Vector2(_origin.x + gridPos.x * _chunkSize, _origin.z + gridPos.y * _chunkSize);
+        await _navMeshBuilder.RebuildNavMeshData(_globalNavigationSourcesList, chunkPos);
     }
 
     private async UniTask AssignMapObjects()
@@ -204,8 +229,7 @@ public class ChunkGenerator : MonoBehaviour
 
         while (true)
         {
-            objToRemove.Clear();
-
+            objToRemove.Clear();           
             foreach (var item in _chunks)
             {
                 var info = item.GetChunkObjectsInfoList();
@@ -220,6 +244,7 @@ public class ChunkGenerator : MonoBehaviour
                         if(item2.MapObject != null)
                         {
                             objToRemove.Add(item2.MapObject);
+                            _activeObjects.Remove(item2.MapObject);
                             item2.MapObject = null;
                         }
                     }
@@ -227,10 +252,13 @@ public class ChunkGenerator : MonoBehaviour
                     {
                         if(item2.MapObject == null)
                         {
-                            item2.SetMapObject(_poolService.GetObjectFromPool(item2.Id));
+                            var obj = _poolService.GetObjectFromPool(item2.Id);
+                            item2.SetMapObject(obj);
+                            _activeObjects.Add(obj);
                         }
                     }
-                }               
+                }
+                await UniTask.Yield();
             }
 
             foreach (var item in objToRemove)
@@ -238,6 +266,24 @@ public class ChunkGenerator : MonoBehaviour
                 _poolService.ReturnToPool(item);
             }
             await UniTask.Yield();
+        }
+    }
+
+    private void FillGlobalNavigation()
+    {
+        _globalNavigationSourcesList.Clear();
+
+        foreach (var obj in _activeObjects)
+        {
+            if(obj.HasNavigationMeshes())
+            {
+                obj.FillNavSources(_globalNavigationSourcesList);
+            }
+        }
+
+        foreach (var item in _chunks)
+        {
+            item.FillNavSource(_globalNavigationSourcesList);
         }
     }
 
@@ -254,7 +300,7 @@ public class ChunkGenerator : MonoBehaviour
 
     private async UniTask InitializeChunk(Chunk chunk, Vector2Int chunkPos)
     {
-        chunk.transform.position = new Vector3(_origin.x + 100f * chunkPos.x, 0f, _origin.z + 100f * chunkPos.y);
+        chunk.transform.position = new Vector3(_origin.x + (100f * chunkPos.x) + 50f, 0f, _origin.z + (100f * chunkPos.y) + 50f);
 
         var job = new ChunkHeightJob
         {
@@ -270,32 +316,33 @@ public class ChunkGenerator : MonoBehaviour
         };
 
         var locationsHandle = Addressables.LoadResourceLocationsAsync($"Chunk_{chunkPos.x}_{chunkPos.y}");
-        await locationsHandle.Task;
+        await locationsHandle.ToUniTask();
 
-        if (locationsHandle.Result == null || locationsHandle.Result.Count == 0)
-        {
-            Debug.LogWarning($"Asset not found: {$"Chunk_{chunkPos.x}_{chunkPos.y}"}");
-            Addressables.Release(locationsHandle);
+        if (locationsHandle.Status == AsyncOperationStatus.Succeeded &&
+                locationsHandle.Result != null &&
+                locationsHandle.Result.Count > 0)
+        {                      
+            var handle = Addressables.LoadAssetAsync<TextAsset>($"Chunk_{chunkPos.x}_{chunkPos.y}");
+            await handle.ToUniTask();
+
+            if (handle.Status != AsyncOperationStatus.Succeeded)
+            {
+                Debug.LogError("Failed to load chunk");
+            }
+            else
+            {
+                var bytes = handle.Result.bytes;
+                await chunk.InitializeChunk(BinaryChunkSerializer.Deserialize(bytes));
+                Addressables.Release(handle);
+            }
         }
-
-        var handle = Addressables.LoadAssetAsync<TextAsset>($"Chunk_{chunkPos.x}_{chunkPos.y}");
-        await handle.Task;
-
-        if (handle.Status != AsyncOperationStatus.Succeeded)
-        {
-            Debug.LogError("Failed to load chunk");
-        }
-        else
-        {
-            var bytes = handle.Result.bytes;
-            chunk.InitializeChunk(BinaryChunkSerializer.Deserialize(bytes));
-            Addressables.Release(handle);
-        }      
+        
+        Addressables.Release(locationsHandle);
 
         var jobHandle = job.Schedule(chunk.Vertices.Length, 64);
         await jobHandle.ToUniTask(PlayerLoopTiming.Update);
 
-        ApplyMeshData(chunk);
+        ApplyMeshData(chunk);      
     }
 
     private void ApplyMeshData(Chunk chunk)
@@ -332,6 +379,7 @@ public class ChunkGenerator : MonoBehaviour
         chunk.AssignMesh();
     }
 }
+
 public struct Vertex
 {
     public float3 position;

@@ -8,7 +8,7 @@ Shader "Unlit/SimpleLightShaderWater"
         _MatcapTex ("MatcapTex", 2D) = "black" {}
         _Offset("Offset", Vector) = (0,0,0,0)
         _BaseColor ("Base Color", Color) = (1,1,1,1)
-        _NormalStrength ("Normal Strength", Range(0,2)) = 1
+        _NormalStrength ("Normal Strength", Range(0,10)) = 1
         _Softness ("Softness", Range(0,1)) = 0
         _TargetDist ("TargetDist", Float) = 0
         _DissolveRadius ("DissolveRadius", Float) = 0
@@ -199,42 +199,48 @@ Shader "Unlit/SimpleLightShaderWater"
 
                 float turbX = sin(positionWS.x * 0.13 + time * 0.01);
                 float turbZ = cos(positionWS.z * 0.07 + time * 0.01);
-
                 float2 distortion = float2(turbX, turbZ) * 0.01; 
 
-                float2 flowUV1 = wUV + flowDir * (time * flowSpeed);
-                float2 flowUV2 = (wUV * 1.5) + flowDir * (time * flowSpeed * 0.6) + float2(0.2, 0.5);
-                float2 flowUV3 = (wUV * 0.5) + flowDir * (time * flowSpeed * 0.3);
+                float2 flowUV1 = wUV + flowDir * (time * flowSpeed) + distortion;
+                float2 flowUV2 = (wUV * 1.5) + flowDir * (time * flowSpeed * 0.6) + float2(0.2, 0.5) + distortion;
+                float2 flowUV3 = (wUV * 0.5) + flowDir * (time * flowSpeed * 0.3) + distortion;
 
-                half3 n1 = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, flowUV1).rgb;
-                half3 n2 = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, flowUV2).rgb;
-                half3 n3 = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, flowUV3).rgb;
+                // --- ПРАВИЛЬНАЯ РАСПАКОВКА НОРМАЛЕЙ ---
+                half3 n1 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, flowUV1));
+                half3 n2 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, flowUV2));
+                half3 n3 = UnpackNormal(SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, flowUV3));
 
-
-                half3 combinedNoise = (n1 + n2 + n3) * 10; 
-                half waveHeight = combinedNoise.r;
-                half crestMask = saturate(waveHeight); 
-                crestMask = pow(crestMask, 1.0h); 
-                half3 normalTS = UnpackNormal(half4(combinedNoise, 1.0));
+                // Смешиваем нормали и применяем силу _NormalStrength только к осям X и Y
+                half3 normalTS = normalize(n1 + n2 + n3);
+                normalTS.xy *= _NormalStrength;
                 normalTS = normalize(normalTS);
+
+                // --- ЧЕТКАЯ МАСКА ПИКОВ (CREST MASK) ---
+                // Чем сильнее нормаль отклоняется от направления "вверх" (0,0,1), тем острее пик волны
+                half waveHeight = saturate(1.0h - normalTS.z); 
+                half crestMask = pow(waveHeight, 2.0h); // Регулирует контрастность вершин
+
+                // Перевод нормали в Мировое пространство
                 float3x3 tbn = float3x3(normalize(v.tangentWS), normalize(v.bitangentWS), normalize(v.normalWS));
                 float3 normalWS = normalize(mul(normalTS, tbn));
 
-
                 Light mainLight = GetMainLight(TransformWorldToShadowCoord(positionWS));
 
+                // --- РАБОТА С ЦВЕТОМ ---
                 half4 color = _BaseColor;   
-                half3 waterSurfaceColor = color.rgb + (waveHeight * 0.2h * color.rgb);
+                // Теперь waveHeight подсвечивает именно вершины (куда указывают изломы нормалей)
+                half3 waterSurfaceColor = color.rgb + (crestMask * 0.4h * mainLight.color); 
 
                 half3 ARM = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, v.uv).rgb;
                 half metalMask = ARM.b;
                 half smoothness = 1 - ARM.g;
 
+                // Настройка стандартного освещения URP
                 InputData lighting = (InputData)0;
                 lighting.positionWS = v.positionWS;
                 lighting.shadowCoord = TransformWorldToShadowCoord(v.positionWS);
                 lighting.viewDirectionWS = viewDirWS;
-                lighting.normalWS = normalWS * _NormalStrength;
+                lighting.normalWS = normalWS; // Передаем чистую нормализованную нормаль
                 lighting.bakedGI = SampleSH(normalWS);
 
                 SurfaceData surface = (SurfaceData)0;
@@ -291,7 +297,7 @@ Shader "Unlit/SimpleLightShaderWater"
 
                 customLightAccum *= additionalLightFactor;
 
-                col.rgb += customLightAccum * color.rgb;
+                col.rgb += saturate(customLightAccum);
 
                 half3 normalVS = mul((half3x3)UNITY_MATRIX_V, normalWS);
                 normalVS = normalize(normalVS);
@@ -305,7 +311,7 @@ Shader "Unlit/SimpleLightShaderWater"
 
                 half matcapPower = metalMask * _MatcapIntensity;
 
-                col.rgb += matcap * metalMask * _MatcapIntensity * (1.0h + fresnel);                
+                col.rgb += matcap * metalMask * saturate(mainLightIntensity - 0.05h) * (1.0h + fresnel);              
                 col.rgb += edge * _DissolveColor.rgb * _EdgeIntensity;
 
                 half3 camPos = _WorldSpaceCameraPos;
@@ -333,7 +339,7 @@ Shader "Unlit/SimpleLightShaderWater"
                 fogFactor = smoothstep(0.0, 1.0, fogFactor);
 
                 col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
-                return half4(col);
+                return half4(col.rgb, _BaseColor.a);
             }
             ENDHLSL
         }

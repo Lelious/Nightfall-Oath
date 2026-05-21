@@ -34,14 +34,14 @@ public class HealthComponent : MonoBehaviour
         {
             var rnd = UnityEngine.Random.Range(0f, 100f);
 
-            if (rnd > 50f)
-            {
-                _animationController.Hit();
-            }
-            else
-            {
+            //if (rnd > 50f)
+            //{
+            //    _animationController.Hit();
+            //}
+            //else
+            //{
                 _animationController.HitVisual();
-            }
+            //}
         }
 
         OnHealthChanged?.Invoke(_currentHealth);

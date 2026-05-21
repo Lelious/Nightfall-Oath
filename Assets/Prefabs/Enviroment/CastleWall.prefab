@@ -196,3 +196,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MapEnviromentObject
   ID: 0
   _persistentObject: 0
+  _navigationMeshes:
+  - {fileID: 3083116415032155493}
