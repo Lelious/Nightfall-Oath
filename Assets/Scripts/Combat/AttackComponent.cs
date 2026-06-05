@@ -8,5 +8,5 @@ public abstract class AttackComponent : MonoBehaviour
 
     public abstract void MakeAttack();
     public abstract void CancelChase();
-    public abstract void PerformAttack(Enemy component);
+    public abstract void PerformAttack(ushort spellId);
 }

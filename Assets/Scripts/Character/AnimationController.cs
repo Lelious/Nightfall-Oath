@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AnimationController : MonoBehaviour
 {
@@ -12,27 +13,40 @@ public class AnimationController : MonoBehaviour
     [SerializeField] private float _castSpeed = 1f;
     [SerializeField] private List<WeaponAnimationPreset> _animationPresets = new();
 
-    private Coroutine _hitRoutine;
-    private AnimationStateMachine _stateMachine;
     private AnimatorOverrideController _overrideController;
+    private AnimationStateMachine _stateMachine;
     private WeaponAnimationPreset _currentSet;
+    private Coroutine _hitRoutine;
 
     private bool _isAttacking;
     private bool _isFreeze;
 
     private void Awake()
     {
+        InitializeService();
+    }
+
+    public void InitializeService()
+    {
         _stateMachine = new AnimationStateMachine(this, _movementComponent);
         _overrideController = new AnimatorOverrideController(_animator.runtimeAnimatorController);
         _animator.runtimeAnimatorController = _overrideController;
         _stateMachine.SetState(AnimationStateType.Idle, 0f);
-
         ApplyAnimationSet(EquippedWeaponType.Unarmed);
     }
 
     private void Update()
     {
         _stateMachine.Update();
+
+        if (_isAttacking)
+        {
+            if (_stateMachine.CurrentState.AnimType != AnimationStateType.Attack)
+            {
+                _isAttacking = false;
+                _movementComponent.IsLockedMovement = false;
+            }
+        }
     }
 
     public void ApplyAnimationSet(EquippedWeaponType weaponType)
@@ -95,28 +109,22 @@ public class AnimationController : MonoBehaviour
         _movementComponent.IsLockedMovement = false;
     }
 
-    [ContextMenu("DEBUGATTACK")]
-    public void DebugAttack()
+    public bool MakeAttack(Vector3 position)
     {
-        MakeCharacterAttack(transform.forward);
-    }
-
-    public void MakeCharacterAttack(Vector3 position)
-    {
-        if (_isFreeze) return;
-        if (_isAttacking) return;
+        if (_isFreeze) return false;
+        if (_isAttacking) return false;
         _isAttacking = true;
         _movementComponent.IsLockedMovement = true;
         _movementComponent.StopMovement();
         var dir = new Vector3(position.x, transform.position.y, position.z) - transform.position;
         transform.rotation = Quaternion.LookRotation(dir);
-        _stateMachine.SetState(AnimationStateType.Attack, 0.1f);
+        _stateMachine.SetState(AnimationStateType.Attack, 0.15f);
+        return true;
     }
 
     public void SuccessAttack()
     {
         _attackComponent.MakeAttack();
-        _isAttacking = false;
         _animator.speed = 1f;
     }
 
@@ -169,6 +177,8 @@ public class AnimationController : MonoBehaviour
     {
         _animator.SetFloat("CastSpeed", castModifier);
     }
+
+    public Animator GetAnimator() => _animator;
 }
 
 [Serializable]

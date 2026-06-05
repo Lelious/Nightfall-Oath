@@ -5,9 +5,10 @@ public class EnemyAIBehaviour : MonoBehaviour
 {
     [SerializeField] private EnemyAttack _attackComponent;
     [SerializeField] private MovementComponent _movementComponent;
-    [SerializeField] private Character _character;
     [SerializeField] private Enemy _enemy;
 
+    private TargetingService _targetingService;
+    private Character _character;
     private Coroutine _aiRoutine;
     private float _actionTime;
     private AIBehaviourState _currentState;
@@ -15,9 +16,9 @@ public class EnemyAIBehaviour : MonoBehaviour
 
     public void SetInitialPosition(Vector3 position) => _initialPosition = position;
 
-    public void RunBehaviour()
+    public void RunBehaviour(TargetingService targetingService)
     {
-        _attackComponent.SetCharacter(_character);
+        _targetingService = targetingService;       
         _currentState = AIBehaviourState.Idle;
 
         _aiRoutine = StartCoroutine(AIBehaviourRoutine());
@@ -39,7 +40,7 @@ public class EnemyAIBehaviour : MonoBehaviour
                 if(TryFindTarget())
                 {
                     _currentState = AIBehaviourState.Chase;
-                    _attackComponent.PerformAttack(_enemy);
+                    _attackComponent.PerformAttack(1);
                 }
                 else
                 {
@@ -64,7 +65,7 @@ public class EnemyAIBehaviour : MonoBehaviour
             {
                 if(TryFindTarget())
                 {
-                    _attackComponent.PerformAttack(_enemy);
+                    _attackComponent.PerformAttack(1);
                 }
                 else
                 {
@@ -78,6 +79,13 @@ public class EnemyAIBehaviour : MonoBehaviour
 
     private bool TryFindTarget()
     {
+        _character = _targetingService.GetCharacter();
+        if (_character == null)
+        {
+            return false;
+        }
+        _attackComponent.SetCharacter(_character);
+
         if (Vector3.Distance(transform.position, _character.transform.position) <= 8f && _character.GetHealth().IsAlive()) 
             return true;
 

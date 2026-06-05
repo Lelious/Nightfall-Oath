@@ -24,7 +24,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _AORoughnessMetallicMap:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: c5c5c0786c6122d4fb5ba726d1429e0f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BaseMap:
@@ -48,7 +48,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DissolveTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 46cd1e6195d6a6540823d26dfdc8ec6d, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _EmissionMap:
@@ -100,7 +100,7 @@ Material:
     - _FogHeight: 2
     - _FogStart: 0
     - _Glossiness: 0.5
-    - _HeightScale: 0.005
+    - _HeightScale: 0.0059
     - _MatcapIntensity: 0
     - _MaxDistance: 0
     - _MaxRadius: 10

@@ -1,64 +1,117 @@
-using System;
-using System.Collections;
+using Cysharp.Threading.Tasks;
+using UniRx;
 using UnityEngine;
-using UnityEngine.EventSystems;
+using Zenject;
 
-public class Enemy : MonoBehaviour, IPointerClickHandler
+public class Enemy : MonoBehaviour, IMapCreature
 {
-    public static event Action OnEnemyDeath;
-
-    [SerializeField] private float _health;
+    [SerializeField] private ushort _id;
     [SerializeField] private AnimationController _animationController;
     [SerializeField] private EnemyMovement _movementComponent;
-    [SerializeField] private Character _character;
-    [SerializeField] private float _attackSpeed = 1f;
-    [SerializeField] private float _speed;
-    [SerializeField] private EquippedWeaponType _weaponType;
-    [SerializeField] private EnemyData _enemyData;
     [SerializeField] private HealthComponent _healthComponent;
     [SerializeField] private EnemyAIBehaviour _aiBehaviour;
+    [SerializeField] private Collider _hitCollider;
+
     [SerializeField] private float _attackDistance = 1.5f;
-    [SerializeField] private DroppedItem _healthPot; //TEST
+    [SerializeField] private float _attackSpeed = 1f;
+    [SerializeField] private float _speed;
 
-    private void Start()
-    {
-        InitializeEnemy();
-        _animationController.SetAttackSpeed(_attackSpeed);
-    }
+    [SerializeField] private EquippedWeaponType _weaponType;
 
+    private readonly CompositeDisposable _disposables = new();
+    private TargetingService _targetingService;
+    private EnemyRuntimeData _runtimeData;
+    private EnemyFactory _enemyFactory;
+    private GameObject _view;
 
-    public void InitializeEnemy()
-    {
-        _aiBehaviour.SetInitialPosition(transform.position);
-        _aiBehaviour.RunBehaviour();
-        _healthComponent.InitializeHealth(_enemyData);
-        _animationController.ApplyAnimationSet(_weaponType);
-        _healthComponent.OnHealthChanged += CheckAliveCondition;
-    }
+    private byte _creatureType;
+    private ushort _level;
+    private bool _elite;
 
-
+    public void SetRotation(Quaternion rotation) => transform.rotation = rotation;
+    public void SetPosition(Vector3 position) => transform.position = position;
+    public void SetScale(Vector3 scale) => transform.localScale = scale;
+    public void SetActive(bool active) => gameObject.SetActive(active);
     public EquippedWeaponType GetCurrentWeaponType() => _weaponType;
     public HealthComponent GetHealth() => _healthComponent;
-    public float GetCreatureFrameScale() => _enemyData.FrameScale;
+    public bool Active() => gameObject.activeInHierarchy;
     public float GetAttackDistance() => _attackDistance;
-    public EnemyData GetData() => _enemyData;
+    public Quaternion Rotation() => transform.rotation;
+    public EnemyRuntimeData GetData() => _runtimeData;
+    public Vector3 Position() => transform.position;
+    public Vector3 Scale() => transform.localScale;
+    public GameObject GetCreatureView() => _view;
+    public Transform Transform() => transform;
+    public bool PersistentObject() => true;
+    public ushort Id() => _id;
 
-    public void CheckAliveCondition(float health)
+    [Inject]
+    public void Construct(TargetingService targetingService, EnemyFactory factory)
+    {
+        _targetingService = targetingService;
+        _enemyFactory = factory;
+    }
+
+    public void SetupCreatureMapInfo(byte creatureType, ushort level)
+    {
+        _creatureType = creatureType;
+        _level = level;
+    }
+
+    public (byte, ushort, bool) GetCreatureTypeAndLvl()
+    {
+        return (_creatureType, _level, _elite);
+    }
+
+    public void InitializeCreature(EnemyRuntimeData data, GameObject view)
+    {
+        _runtimeData = data;
+        _hitCollider.enabled = true;
+        _view = view;
+
+        RebindDependencies();
+    }
+
+    private void RebindDependencies()
+    {
+        _animationController.SetAttackSpeed(_runtimeData.AttackSpeed);
+        _movementComponent.SetSpeed(_runtimeData.Speed);
+
+        var animator = _animationController.GetAnimator();
+        animator.avatar = _runtimeData.Avatar;
+        animator.Rebind();
+        animator.Update(0f);
+
+        _aiBehaviour.SetInitialPosition(transform.position);
+        _aiBehaviour.RunBehaviour(_targetingService);
+        _healthComponent.InitializeHealth(new HealthData(_runtimeData.MaxHealth, 0)); 
+        _animationController.ApplyAnimationSet(_weaponType);
+        _targetingService.AddEnemyToTargeting(this);
+
+        _healthComponent.CurrentHp.
+            Subscribe(value => OnHit(value))
+            .AddTo(_disposables);
+    }
+
+    private void OnHit(float health)
     {
         if (health <= 0)
         {
             _aiBehaviour.StopBehaviour();
-            OnEnemyDeath?.Invoke();
-            //var pot = Instantiate(_healthPot, transform.position, Quaternion.Euler(60f, 0f, 0f));
-            //pot.InitializeItem();
-            Destroy(gameObject, 3f);
+            _animationController.Death();
+            _hitCollider.enabled = false;
+            _targetingService.RemoveEnemyFromTargeting(this);
+            ReturnToPool().Forget();
+        }
+        else
+        {
+            _animationController.HitVisual();
         }
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    private async UniTask ReturnToPool()
     {
-        var finder = FindFirstObjectByType<TargetFinderComponent>();
-        finder.SetTarget(this);
-        finder.StopAutotarget();
+        await UniTask.WaitForSeconds(3f);
+        _enemyFactory.DestroyEnemy(this);
     }
 }

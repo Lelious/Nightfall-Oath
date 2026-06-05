@@ -92,7 +92,7 @@ Shader "Unlit/SimpleLightShaderWind"
             #define MAX_BUFFER_LENGTH 50 
             float4 _LightPositions[MAX_BUFFER_LENGTH]; 
             float4 _LightColors[MAX_BUFFER_LENGTH]; 
-            float _LightRadii[MAX_BUFFER_LENGTH]; 
+            float _LightRadius[MAX_BUFFER_LENGTH]; 
             float _LightCount;
 
             CBUFFER_START(UnityPerMaterial)
@@ -251,7 +251,7 @@ Shader "Unlit/SimpleLightShaderWind"
                 {
                     half3 lightPos = _LightPositions[idx].xyz;
                     half3 lightColor = _LightColors[idx].rgb;
-                    half radius = _LightRadii[idx];
+                    half radius = _LightRadius[idx];
 
                     half3 L = lightPos - v.positionWS;
                     half distSqr = dot(L, L);
@@ -303,18 +303,13 @@ Shader "Unlit/SimpleLightShaderWind"
                                 half3 camPos = _WorldSpaceCameraPos;
                 half dist = length(camPos - v.positionWS);
 
-half fogFactor = saturate((dist - _FogStart) / (_FogEnd - _FogStart));
+                half fogFactor = saturate((dist - _FogStart) / (_FogEnd - _FogStart));
 
-// 2. ”лучшаем расчет €ркости тумана
-// „тобы туман не "светилс€" сам по себе, берем €ркость из MainLight
-half3 adjustedFogColor = _FogColor.rgb * mainLight.color;
+                half3 adjustedFogColor = _FogColor.rgb * mainLight.color;
 
-// 3. ѕлавный порог: используем smoothstep вместо линейного затухани€, 
-// чтобы у камеры туман гарантированно был нулевым
-fogFactor = smoothstep(0.0, 1.0, fogFactor);
+                fogFactor = smoothstep(0.0, 1.0, fogFactor);
 
-// 4. ‘инальное наложение
-col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
+                col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
                 return half4(col.rgb, col.a);
             }
             ENDHLSL

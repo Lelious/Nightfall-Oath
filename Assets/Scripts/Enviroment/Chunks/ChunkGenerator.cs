@@ -1,7 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
 using LeliousExtentions;
+using System;
 using System.Collections.Generic;
-using Unity.AI.Navigation;
 using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
@@ -12,10 +12,8 @@ using UnityEngine.Rendering;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using Zenject;
 
-public class ChunkGenerator : MonoBehaviour
+public class ChunkGenerator : MonoBehaviour, IDisposable
 {
-    [SerializeField] private Character _hero;
-    [SerializeField] private List<Chunk> _chunks = new();
     [SerializeField] private float _chunkSize = 100f;
     [SerializeField] private Vector3 _origin = new Vector3(-950f, 0f, -950f);
     [SerializeField] private Vector3 _startCoordinate;
@@ -23,24 +21,33 @@ public class ChunkGenerator : MonoBehaviour
     [SerializeField] private float _detailDist = 10f;
     [SerializeField] private float _zOffset;
     [SerializeField] private float _distanceToRebuild = 120f;
-    [SerializeField] private ObjectDatabase _dataBase;
 
-    [Inject]
-    private PoolService _poolService;
-    [SerializeField] private NavMeshBuilderService _navMeshBuilder;
-
+    private Dictionary<Vector2Int, RuntimeChunkData> _runtimeDataDict;
     private List<NavMeshBuildSource> _globalNavigationSourcesList;
-    private List<IMapObject> _activeObjects;
-    private HashSet<Chunk> _dirtyChunks;
-    private int _sqrtLength;
-    private float _distPervertex;
-    public bool _chunksRebuild;
-    private Vector2 _lastRebuildedPos;
+    private readonly List<GameObject> _spawnedChunks = new();
     private NativeArray<ushort> _heightDataNative;
+    private NavMeshBuilderService _navMeshBuilder;
+    private List<IMapObject> _activeObjects;
+    private List<Chunk> _chunks = new();
+    private HashSet<Chunk> _dirtyChunks;
+    private EnemyFactory _enemyFactory;
+    private Vector2 _lastRebuildedPos;
+    private PoolService _poolService;
+    private Transform _worldParent;
+    private float _distPervertex;
+    private bool _chunksRebuild;
+    private Character _hero;
+    private int _sqrtLength;
     private bool _inited;
 
-    private void Start()
+    [Inject]
+    public void Construct(Character hero, PoolService poolService, NavMeshBuilderService navMeshBuilder, EnemyFactory enemyFactory)
     {
+        _navMeshBuilder = navMeshBuilder;
+        _enemyFactory = enemyFactory;
+        _poolService = poolService;
+        _hero = hero;
+
         Init().Forget();
     }
 
@@ -57,7 +64,6 @@ public class ChunkGenerator : MonoBehaviour
                 {
                     var centerChunk = GetChunkCoord(_hero.transform.position);
                     _lastRebuildedPos = heroPos;
-                    Debug.Log($"Distance {Vector2.Distance(new Vector2(_hero.transform.position.x, _hero.transform.position.z), _lastRebuildedPos)}");
                     UpdateChunks(centerChunk).Forget();
                 }
             }
@@ -67,13 +73,18 @@ public class ChunkGenerator : MonoBehaviour
                 FillGlobalNavigation();
                 await RebuildNavMesh(_hero.transform.position);
             }
-        }       
+        } 
     }
 
     private async UniTaskVoid Init()
     {
-        _poolService.InitializePool(_dataBase, 30);
+        _worldParent = new GameObject("World").transform;
+
+        await CreateChunks();
+        await _poolService.InitializePool(30, _worldParent);
+
         _globalNavigationSourcesList = new();
+        _runtimeDataDict = new();
         _dirtyChunks = new();
         _activeObjects = new();
 
@@ -100,7 +111,9 @@ public class ChunkGenerator : MonoBehaviour
             var mesh = filter.mesh;
             filter.sharedMesh = Instantiate(mesh);
             filter.sharedMesh.MarkDynamic();
+            chunk.Mesh = filter.sharedMesh;
             chunk.GridPosition = new Vector2Int(-1, -1);
+            chunk.CreateChunkData();
         }
 
         var centerChunk = GetChunkCoord(_hero.transform.position);
@@ -126,6 +139,32 @@ public class ChunkGenerator : MonoBehaviour
         AssignMapObjects().Forget();
         _inited = true;
         UpdateFunc().Forget();
+    }
+
+    private async UniTask CreateChunks()
+    {
+        List<UniTask<GameObject>> spawnTasks = new List<UniTask<GameObject>>();
+
+        for (int i = 0; i < 9; i++)
+        {
+            var task = Addressables.InstantiateAsync(
+                AssetPath.Chunk,
+                Vector3.zero,
+                Quaternion.identity,
+                _worldParent
+            ).ToUniTask();
+
+            spawnTasks.Add(task);
+        }
+
+        GameObject[] loadedChunks = await UniTask.WhenAll(spawnTasks);
+
+        _spawnedChunks.AddRange(loadedChunks);
+
+        foreach (var item in loadedChunks)
+        {
+            _chunks.Add(item.GetComponent<Chunk>());
+        }
     }
 
     private List<Vector2Int> GetSpawnDirections(Vector2Int center)
@@ -226,38 +265,88 @@ public class ChunkGenerator : MonoBehaviour
     private async UniTask AssignMapObjects()
     {
         List<IMapObject> objToRemove = new();
-
         while (true)
         {
-            objToRemove.Clear();           
+            objToRemove.Clear();
             foreach (var item in _chunks)
             {
-                var info = item.GetChunkObjectsInfoList();
+                Vector2 heroPos = new Vector2(_hero.transform.position.x, _hero.transform.position.z + _zOffset);
 
-                if (info == null || info.Count == 0) break;
-
-                foreach (var item2 in info)
+                var staticInfo = item.GetChunkObjectsInfoList();
+                if (staticInfo != null && staticInfo.Count > 0)
                 {
-                    if (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(_hero.transform.position.x, _hero.transform.position.z + _zOffset),
-                    new Vector2(item2.Position.x, item2.Position.z), _detailDist))
+                    foreach (var item2 in staticInfo)
                     {
-                        if(item2.MapObject != null)
+                        Vector3 staticPos = item2.MapObject != null ? item2.MapObject.Position() : item2.Position;
+
+                        if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, new Vector2(staticPos.x, staticPos.z), _detailDist))
                         {
-                            objToRemove.Add(item2.MapObject);
-                            _activeObjects.Remove(item2.MapObject);
-                            item2.MapObject = null;
+                            if (item2.MapObject != null)
+                            {
+                                objToRemove.Add(item2.MapObject);
+                                _activeObjects.Remove(item2.MapObject);
+                                item2.MapObject = null;
+                            }
                         }
-                    }
-                    else
-                    {
-                        if(item2.MapObject == null)
+                        else
                         {
-                            var obj = _poolService.GetObjectFromPool(item2.Id);
-                            item2.SetMapObject(obj);
-                            _activeObjects.Add(obj);
+                            if (item2.MapObject == null)
+                            {
+                                var obj = _poolService.GetObjectFromPool(item2.Id);
+                                item2.SetMapObject(obj);
+                                _activeObjects.Add(obj);
+                            }
                         }
                     }
                 }
+
+                if (_runtimeDataDict.TryGetValue(item.GridPosition, out var runtimeChunk))
+                {
+                    var creatures = runtimeChunk.RuntimeObjects.ToArray();
+                    foreach (var item2 in creatures)
+                    {
+                        if (!item2.Alive) continue;
+
+                        Vector3 enemyPos = item2.DynamicObject.MapObject != null
+                            ? item2.DynamicObject.MapObject.Position()
+                            : item2.DynamicObject.Position;
+
+                        if (item2.DynamicObject.MapObject != null)
+                        {
+                            Vector2Int currentActualChunk = GetChunkCoord(enemyPos);
+
+                            if (currentActualChunk != item.GridPosition)
+                            {
+                                item2.DynamicObject.Position = enemyPos;
+                                Debug.Log($"Migrate to {currentActualChunk}");
+                                MigrateCreatureToNewChunk(item.GridPosition, currentActualChunk, item2);
+
+                                continue;
+                            }
+                        }
+                        if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, new Vector2(enemyPos.x, enemyPos.z), _detailDist))
+                        {
+                            if (item2.DynamicObject.MapObject != null)
+                            {
+                                item2.DynamicObject.Position = enemyPos;
+
+                                _enemyFactory.DestroyEnemy(item2.DynamicObject.MapObject as IMapCreature);
+                                item2.DynamicObject.MapObject = null;
+                            }
+                        }
+                        else
+                        {
+                            if (item2.DynamicObject.MapObject == null)
+                            {
+                                var creatureGo = _poolService.GetObjectFromPool(item2.DynamicObject.Id);
+                                item2.DynamicObject.SetMapObject(creatureGo);
+                                await _enemyFactory.CreateEnemy(creatureGo as IMapCreature, item2.DynamicObject);
+                                item2.DynamicObject.MapObject = creatureGo;
+                            }
+                        }
+                    }
+                }
+
                 await UniTask.Yield();
             }
 
@@ -269,15 +358,33 @@ public class ChunkGenerator : MonoBehaviour
         }
     }
 
+    private void MigrateCreatureToNewChunk(Vector2Int oldChunkPos, Vector2Int newChunkPos, RuntimeChunkObject obj)
+    {
+        if (_runtimeDataDict.TryGetValue(oldChunkPos, out var oldChunk))
+        {
+            oldChunk.RuntimeObjects.Remove(obj);
+        }
+
+        if (!_runtimeDataDict.ContainsKey(newChunkPos))
+        {
+            _runtimeDataDict[newChunkPos] = new RuntimeChunkData(new List<MapCreatureInfo>());
+        }
+
+        _runtimeDataDict[newChunkPos].RuntimeObjects.Add(obj);
+    }
+
     private void FillGlobalNavigation()
     {
         _globalNavigationSourcesList.Clear();
 
         foreach (var obj in _activeObjects)
         {
-            if(obj.HasNavigationMeshes())
+            if(obj is IMapNavigation navigation)
             {
-                obj.FillNavSources(_globalNavigationSourcesList);
+                if(navigation.HasNavigationMeshes())
+                {
+                    navigation.FillNavSources(_globalNavigationSourcesList);
+                }
             }
         }
 
@@ -332,8 +439,30 @@ public class ChunkGenerator : MonoBehaviour
             else
             {
                 var bytes = handle.Result.bytes;
-                await chunk.InitializeChunk(BinaryChunkSerializer.Deserialize(bytes));
+                var allData = BinaryChunkSerializer.Deserialize(bytes);
+                var staticData = new List<MapObjectInfo>();
+                var dynamicData = new List<MapCreatureInfo>();
+
                 Addressables.Release(handle);
+
+                foreach (var item in allData)
+                {
+                    if (item is MapCreatureInfo creature)
+                    {
+                        dynamicData.Add(creature);
+                    }
+                    else
+                    {
+                        staticData.Add(item);
+                    }
+                }
+
+                await chunk.InitializeChunk(staticData);
+
+                if (!_runtimeDataDict.ContainsKey(chunkPos))
+                {
+                    _runtimeDataDict[chunkPos] = new RuntimeChunkData(dynamicData);
+                }
             }
         }
         
@@ -378,16 +507,17 @@ public class ChunkGenerator : MonoBehaviour
         chunk.Mesh.RecalculateBounds();
         chunk.AssignMesh();
     }
-}
 
-public struct Vertex
-{
-    public float3 position;
-    public float3 normal;
-
-    public Vertex(float3 position, float3 normal)
+    public void Dispose()
     {
-        this.position = position;
-        this.normal = normal;
+        foreach (var chunk in _spawnedChunks)
+        {
+            if (chunk != null)
+            {
+                Addressables.ReleaseInstance(chunk);
+            }
+        }
+
+        _spawnedChunks.Clear();
     }
 }

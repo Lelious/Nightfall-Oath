@@ -15,6 +15,16 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 06e70636987fbc0469e7f9168653511f
   m_SerializeEntries:
+  - m_GUID: 1713a194995913c41ada2d1b083f4ce0
+    m_Address: LightSource
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 250e01acdfabe154cae64a7b586269b1
+    m_Address: ObjectDatabase
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 2a48b9e7cd611a64bbed831bbcc4bd89
     m_Address: ChunkNav_1_0
     m_ReadOnly: 0
@@ -50,8 +60,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 46874b58207a88c49a26ec902d426ef3
+    m_Address: EnemyBase
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 48c1d890aeeddb44ba824277645eaf78
     m_Address: Chunk_1_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 49fb24dbc72756142a37618d5bbb0806
+    m_Address: CameraParent
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -60,8 +80,23 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57ca1ff77b1919f46aa76c5f58b74a40
+    m_Address: InterfaceUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 7a45e721c337bb7409ce4e8042bbd5d3
     m_Address: ChunkNav_0_0
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7eb5011c8c613534f9747c2067127015
+    m_Address: ChunkGenerator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ae4dc0296c31c94e95d5fd2faa2c838
+    m_Address: Chunk
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -80,13 +115,28 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c01356c5bff2cc345a1929e7faaa4412
+    m_Address: PlayerHUD
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: c0e9e439add44c240a50999e80a53d56
     m_Address: Chunk_0_0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d8fb62a0657580845b0ee62dc58919d7
+    m_Address: NavMeshBuilder
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: dc106c363ae49004ebb59312d628382c
     m_Address: heightmap
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e52c29cf40d70e240b8124bc36bebc42
+    m_Address: CharacterMale
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -102,6 +152,21 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f3d8250273c4a1e4c834ab8c4ddc0091
     m_Address: Chunk_0_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f45dd9398f9f3ff4ba94d1dbf0b842f5
+    m_Address: CreatureDatabase
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f8243bb353e5cb74481bb26fe62fd298
+    m_Address: Wolf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd379613d3cff3e45af99cc6335c6d59
+    m_Address: ScreenTargetSelector
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

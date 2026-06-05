@@ -1,18 +1,60 @@
-using UnityEngine;
 using Zenject;
 
 public class BootstrapInstaller : MonoInstaller
-{
+{   
     public override void InstallBindings()
     {
         BindPool();
+        BindInputService();
+        BindLightService();
+        BindTargetingService();
+        BindSceneInitializer();
+        BindEnemyFactory();
     }
 
     private void BindPool()
     {
-        Container.
-             BindInterfacesAndSelfTo<PoolService>().
-             AsSingle().
-             NonLazy();
+        Container
+            .Bind<PoolService>()
+            .AsSingle();
+    }
+
+    private void BindTargetingService()
+    {
+        Container
+            .Bind<TargetingService>()
+            .AsSingle()
+            .NonLazy();
+    }
+
+    private void BindSceneInitializer()
+    {
+        Container
+            .BindInterfacesAndSelfTo<SceneInitializerService>()
+            .AsSingle()
+            .NonLazy();
+    }
+
+    private void BindLightService()
+    {
+        Container
+            .BindInterfacesAndSelfTo<CustomLightService>()
+            .AsSingle()
+            .NonLazy();
+    }
+
+    private void BindEnemyFactory()
+    {
+        Container
+            .BindInterfacesAndSelfTo<EnemyFactory>()
+            .AsSingle()
+            .NonLazy();
+    }
+
+    private void BindInputService()
+    {
+        Container
+            .Bind<InputService>()
+            .AsSingle();
     }
 }

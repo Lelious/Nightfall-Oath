@@ -101,7 +101,7 @@ Shader "Unlit/SimpleLightShader"
             #define MAX_BUFFER_LENGTH 50 
             float4 _LightPositions[MAX_BUFFER_LENGTH]; 
             float4 _LightColors[MAX_BUFFER_LENGTH]; 
-            float _LightRadii[MAX_BUFFER_LENGTH]; 
+            float _LightRadius[MAX_BUFFER_LENGTH]; 
             float _LightCount;
 
             CBUFFER_START(UnityPerMaterial)
@@ -250,7 +250,7 @@ Shader "Unlit/SimpleLightShader"
                 {
                     half3 lightPos = _LightPositions[idx].xyz;
                     half3 lightColor = _LightColors[idx].rgb;
-                    half radius = _LightRadii[idx];
+                    half radius = _LightRadius[idx];
 
                     half3 L = lightPos - v.positionWS;
                     half distSqr = dot(L, L);

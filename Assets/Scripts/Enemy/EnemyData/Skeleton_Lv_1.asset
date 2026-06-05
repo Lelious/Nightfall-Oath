@@ -16,4 +16,4 @@ MonoBehaviour:
   Level: 1
   Health: 100
   Elite: 0
-  FrameScale: 1
+  FrameScale: 4

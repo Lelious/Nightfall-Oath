@@ -1,27 +1,37 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Zenject;
 
 public class DroppedItem : MonoBehaviour, IPointerClickHandler
 {
-    [SerializeField] private Inventory _inventory;
     [SerializeField] private Item _item;
-    [SerializeField] private TextMeshPro _itemName;   
+    [SerializeField] private TextMeshPro _itemName;
+
+    private InventoryService _inventory;
+
+    public void Construct(InventoryService inventory)
+    {
+        _inventory = inventory;
+    }
 
     private void Awake()
     {
         _itemName.text = _item.Name;
     }
 
-    public void InitializeItem(Inventory inventory, Item item)
+    public void InitializeItem(Item item)
     {
-        _inventory = inventory;
         _item = item;
         _itemName.text = _item.Name;
     }
 
     public void OnPointerClick(PointerEventData eventData)
     {
+        if(_inventory == null)
+        {
+            _inventory = FindFirstObjectByType<InventoryService>(FindObjectsInactive.Include);
+        }
         _inventory.TryPutItemToInventory(this);
     }
 

@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MovementComponent : MonoBehaviour
+public abstract class MovementComponent : MonoBehaviour
 {
     [SerializeField] private NavMeshAgent _agent;
 
@@ -19,12 +19,12 @@ public class MovementComponent : MonoBehaviour
         SetMovementDirection();
     }
 
-    public void SetStopDistance(float stopDistance)
+    public virtual void SetStopDistance(float stopDistance)
     {
         _agent.stoppingDistance = stopDistance;
     }
 
-    public void Move(Vector3 point, float speed)
+    public virtual void Move(Vector3 point, float speed)
     {
         if (IsLockedMovement) return;
 
@@ -37,20 +37,25 @@ public class MovementComponent : MonoBehaviour
         }
     }
 
-    public void MoveToPoint(Vector3 point)
+    public virtual void MoveToPoint(Vector3 point)
     {
         if (!_agent.isActiveAndEnabled || IsLockedMovement || !_agent.isOnNavMesh) return;
         _agent.isStopped = false;
         _agent.SetDestination(point);
     }
 
-    public void StopMovement()
+    public virtual void StopMovement()
     {
         _agent.isStopped = true;     
     }
 
-    public void SetMovementDirection()
+    public virtual void SetMovementDirection()
     {
         MovementDirection = _agent.velocity.normalized;
+    }
+
+    public virtual void SetSpeed(float speed)
+    {
+        _agent.speed = speed;
     }
 }

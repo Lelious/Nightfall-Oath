@@ -14,7 +14,7 @@ public class UIItemInventorySlot : MonoBehaviour, IBeginDragHandler, IEndDragHan
     [SerializeField] private InventorySlotType _slotType;
     [SerializeField] private Image _highlight;
 
-    private Inventory _inventory;
+    private InventoryService _inventory;
     private Item _item;
     private bool _isEmptySlot = true;
     private DraggedItem _draggedItem;
@@ -22,7 +22,7 @@ public class UIItemInventorySlot : MonoBehaviour, IBeginDragHandler, IEndDragHan
     public bool IsEmpty() => _isEmptySlot;
     public Item GetSlotItem() => _item;
 
-    public void InitializeSlot(Inventory inventory)
+    public void InitializeSlot(InventoryService inventory)
     {
         _inventory = inventory;
         if(!_slotType.Equals(InventorySlotType.Bag))
@@ -122,7 +122,6 @@ public class UIItemInventorySlot : MonoBehaviour, IBeginDragHandler, IEndDragHan
         _inventory.DropItem(_item);
         ClearItemSlot();
         RemoveDraggedObject();
-
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -133,7 +132,7 @@ public class UIItemInventorySlot : MonoBehaviour, IBeginDragHandler, IEndDragHan
     public void RemoveDraggedObject()
     {
         if (_draggedItem == null) return;
-
+        Debug.Log("Destroying dragged item");
         Destroy(_draggedItem.gameObject);
     }
 
@@ -179,6 +178,7 @@ public class UIItemInventorySlot : MonoBehaviour, IBeginDragHandler, IEndDragHan
 
     private void ClearItemSlot()
     {
+        Debug.Log("Clear item slot");
         _item = null;
         _itemImage.sprite = _defaultSlotImage;
         _slotRarity.sprite = _defaultSlotImage;

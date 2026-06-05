@@ -29,7 +29,7 @@ public class EnemyAttack : AttackComponent
         }
     }
 
-    public override void PerformAttack(Enemy enemy)
+    public override void PerformAttack(ushort spellId)
     {
         _attackDistance = _enemy.GetAttackDistance();     
 
@@ -46,7 +46,7 @@ public class EnemyAttack : AttackComponent
             return;
         }
         
-        _animationController.MakeCharacterAttack(_targetToChase.transform.position);
+        _animationController.MakeAttack(_targetToChase.transform.position);
     }
 
     public void StopAttack()
@@ -65,7 +65,7 @@ public class EnemyAttack : AttackComponent
 
         if (_targetToChase.GetHealth().IsAlive())
         {
-            PerformAttack(_enemy);
+            PerformAttack(1);
         }
 
         _chaseRoutine = null;

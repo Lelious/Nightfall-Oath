@@ -21,7 +21,6 @@ public class NavMeshBuilderService : MonoBehaviour
 
     public async UniTask RebuildNavMeshData(List<NavMeshBuildSource> chunkSources, Vector3 center)
     {
-        Debug.Log("UpdatingNav");
         if (_onRebuild) return;
 
         _onRebuild = !_onRebuild;

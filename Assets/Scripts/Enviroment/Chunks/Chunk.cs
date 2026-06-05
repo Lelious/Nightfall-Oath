@@ -19,14 +19,8 @@ public class Chunk : MonoBehaviour
     private List<MapObjectInfo> _chunkObjectsInfo;
     private AsyncOperationHandle<Mesh> _navigationMeshHandle;
 
-    private void Start()
+    public void CreateChunkData()
     {
-        Mesh mesh = Instantiate(_meshFilter.sharedMesh);
-        _meshFilter.mesh = mesh;
-        mesh.MarkDynamic();
-        mesh.UploadMeshData(false);
-        Mesh = mesh;
-
         var verts = Mesh.vertices;
         int count = verts.Length;
 

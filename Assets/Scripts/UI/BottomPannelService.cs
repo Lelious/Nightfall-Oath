@@ -15,7 +15,11 @@ public class BottomPannelService : MonoBehaviour
                        _questLogWindow,
                        _infoWindow;
 
-    private GameObject _previousOpenedWindow; 
+    [SerializeField] private InventoryService _inventoryService; 
+
+    private GameObject _previousOpenedWindow;
+
+    public InventoryService GetInventory() => _inventoryService;
 
     private void Awake()
     {

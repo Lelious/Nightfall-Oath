@@ -1,15 +1,17 @@
 using LeliousExtentions;
 using System.Collections;
+using UniRx;
 using UnityEngine;
-using UnityEngine.UI;
+using Zenject;
 
 public class CharacterAttack : AttackComponent
 {
-    [SerializeField] private Character _character;
-    [SerializeField] private Button _attackButton;
-    [SerializeField] private TargetFinderComponent _targetFinder;
     [SerializeField] private MovementComponent _movementComponent;
+    [SerializeField] private Character _character;  
 
+    private readonly CompositeDisposable _disposables = new();
+    private TargetingService _targetingService;    
+    private InputService _inputService;
     private Enemy _targetToChase;
     private Enemy _targetToAttack;
     private Coroutine _chaseRoutine;
@@ -17,7 +19,22 @@ public class CharacterAttack : AttackComponent
 
     private void Awake()
     {
-        _attackButton.onClick.AddListener(delegate { PerformAttack(null); });
+        StartCoroutine(SetTargetFrame());
+    }
+
+    [Inject]
+    public void Construct(TargetingService targetingService, InputService inputService)
+    {
+        _targetingService = targetingService;
+        _inputService = inputService;
+
+        Observable.EveryUpdate()
+            .Where(_ => _inputService.ActionSpellId.Value > 0)
+            .Subscribe(_ =>
+            {
+                PerformAttack(_inputService.ActionSpellId.Value);
+            })
+            .AddTo(_disposables);
     }
 
     public override void MakeAttack()
@@ -35,43 +52,95 @@ public class CharacterAttack : AttackComponent
         }
     }
 
-    public override void PerformAttack(Enemy enemy)
+    public override void PerformAttack(ushort spellId)
     {
         if (!_character.GetHealth().IsAlive()) return;
 
-        _attackDistance = _character.GetAttackDistance();
-        var target = enemy == null ? _targetFinder.GetPossibleTarget(transform.position, _attackDistance) : enemy;
-
-        if (target == null) return;        
-
-        if(LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(target.transform.position.x, target.transform.position.z), _attackDistance))
+        if(spellId == 1)
         {
-            _movementComponent.MoveToPoint(target.transform.position);
-            _targetToChase = target;
+            _attackDistance = _character.GetAttackDistance();
+            _targetToAttack = _targetToAttack == null ||
+                                _targetToAttack.GetHealth().CurrentHp.Value <= 0 ||
+                                LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(_targetToAttack.transform.position.x, _targetToAttack.transform.position.z), 1.5f) ?
+                                _targetingService.FindTarget(transform.position) : _targetToAttack;
 
-            if(_chaseRoutine != null)
+            if (_targetToAttack == null)
             {
-                StopCoroutine(_chaseRoutine);
+                _inputService.SetTarget(null, true);
+                return;
             }
 
-            _chaseRoutine = StartCoroutine(ChaseRoutine());
-            return;
+            if (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(_targetToAttack.transform.position.x, _targetToAttack.transform.position.z), _attackDistance))
+            {               
+                _targetToChase = _targetToAttack;
+
+                if (_chaseRoutine != null)
+                {
+                    StopCoroutine(_chaseRoutine);
+                }
+
+                _chaseRoutine = StartCoroutine(ChaseRoutine());
+                return;
+            }
+           
+            var sucessAttack = _animationController.MakeAttack(_targetToAttack.transform.position);
+
+            if(sucessAttack)
+            {
+                _character.GetHealth().DecreaceMana(5);
+            }
         }
-      
-        _animationController.MakeCharacterAttack(target.transform.position);
-        _targetToAttack = target;
+    }
+
+    private void FindTarget()
+    {
+        _targetToAttack = _targetingService.FindTarget(transform.position);
+        if(_targetToAttack != null)
+        {
+            _inputService.SetTarget(_targetToAttack, true);      
+        }
+    }
+
+    private IEnumerator SetTargetFrame()
+    {
+        while (true)
+        {
+            if (_inputService.IsAutotarget.Value)
+            {
+                FindTarget();
+                _inputService.SetTarget(_targetToAttack, true);
+            }
+            else
+            {
+                if (_targetToAttack == null)
+                {
+                    _inputService.CancelTarget();
+                }
+                else
+                {
+                    var cancelDistance = _inputService.IsAutotarget.Value == true ? 20f : 25f;
+
+                    if (Vector3.Distance(transform.position, _targetToAttack.transform.position) > cancelDistance)
+                    {
+                        _inputService.CancelTarget();
+                    }
+                }
+            }
+            yield return new WaitForSeconds(0.3f);
+        }
     }
 
     private IEnumerator ChaseRoutine()
     {
         while (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(_targetToChase.transform.position.x, _targetToChase.transform.position.z), _attackDistance))
         {
+            _movementComponent.MoveToPoint(_targetToAttack.transform.position);
             yield return new WaitForSeconds(0.1f);
         }
 
         if(_targetToChase.GetHealth().IsAlive())
         {
-            PerformAttack(_targetToChase);
+            PerformAttack(1);
         }
 
         _chaseRoutine = null;
@@ -84,5 +153,10 @@ public class CharacterAttack : AttackComponent
             StopCoroutine(_chaseRoutine);
             _chaseRoutine = null;
         }
+    }
+
+    private void OnDestroy()
+    {
+        _disposables.Dispose();
     }
 }

@@ -1,53 +1,48 @@
-using System;
+using UniRx;
 using UnityEngine;
 
 public class HealthComponent : MonoBehaviour
 {
-    public event Action<float> OnHealthChanged;
+    public IReadOnlyReactiveProperty<float> CurrentHp => _currentHp;
+    public IReadOnlyReactiveProperty<float> CurrentMp => _currentMp;
+    public IReadOnlyReactiveProperty<float> MaxHp => _maxHp;
+    public IReadOnlyReactiveProperty<float> MaxMp => _maxMp;
 
-    [SerializeField] private float _health;
-    [SerializeField] private AnimationController _animationController;
-    [SerializeField] private Collider _hitCollider;
-    [SerializeField] private float _currentHealth = 1;
-    [SerializeField] private UIHealthAndManaService _healthManaService;
+    private readonly FloatReactiveProperty _currentHp = new(100);
+    private readonly FloatReactiveProperty _maxHp = new(100);
+    private readonly FloatReactiveProperty _currentMp = new(100);
+    private readonly FloatReactiveProperty _maxMp = new(100);
 
-    public bool IsAlive() => _currentHealth > 0;
+    public bool IsAlive() => _currentHp.Value > 0;
 
-    public void InitializeHealth(EnemyData data)
+    public void InitializeHealth(HealthData data)
     {
-        _health = data.Health;
-        _currentHealth = data.Health;
-        _healthManaService?.UpdateHealth(_currentHealth, _health);
+        _maxHp.Value = data.Health;
+        _currentHp.Value = data.Health;
+
+        _maxMp.Value = data.Mana;
+        _currentMp.Value = data.Mana;
     }
 
     public void TakeDamage(float damage)
     {
-        _currentHealth -= damage;
-
-        if (_currentHealth <= 0)
-        {
-            _animationController.Death();
-            _hitCollider.enabled = false;
-            //Destroy(gameObject, 2f);
-        }
-        else
-        {
-            var rnd = UnityEngine.Random.Range(0f, 100f);
-
-            //if (rnd > 50f)
-            //{
-            //    _animationController.Hit();
-            //}
-            //else
-            //{
-                _animationController.HitVisual();
-            //}
-        }
-
-        OnHealthChanged?.Invoke(_currentHealth);
-        _healthManaService?.UpdateHealth(_currentHealth, _health);
+        _currentHp.Value = Mathf.Clamp(_currentHp.Value - damage, 0, _maxHp.Value);
     }
 
-    public float GetMaxHealth() => _health;
-    public float GetCurrentHealth() => _currentHealth;
+    public void DecreaceMana(int value)
+    {
+        _currentMp.Value = Mathf.Clamp(_currentMp.Value - value, 0, _maxMp.Value);
+    }
+}
+
+public struct HealthData
+{
+    public int Health;
+    public int Mana;
+
+    public HealthData(int health, int mana)
+    {
+        Health = health;
+        Mana = mana;
+    }
 }

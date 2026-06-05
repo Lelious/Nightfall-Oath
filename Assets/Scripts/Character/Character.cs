@@ -1,24 +1,39 @@
+using UniRx;
 using UnityEngine;
+using Zenject;
 
 public class Character : MonoBehaviour
 {
-    [SerializeField] private CharacterMovement _characterMovement;
-    [SerializeField] private FixedJoystick _joystick;
     [SerializeField] private AnimationController _animationController;
-    [SerializeField] private MovementComponent _movementComponent;
+    [SerializeField] private CharacterMovement _movementComponent;
+    [SerializeField] private CharacterAttack _attackComponent;
+    [SerializeField] private HealthComponent _healthComponent;
+    [SerializeField] private Transform _leftHand, _rightHand;
+    [SerializeField] private Collider _hitCollider;
+
     [SerializeField] private float _attackSpeed = 1f;
     [SerializeField] private float _castSpeed = 1f;
-    [SerializeField] private EquippedWeaponType _weaponType;
-    [SerializeField] private Transform _leftHand, _rightHand;
-    [SerializeField] private HealthComponent _healthComponent;
-    [SerializeField] private EnemyData _data;  //TEST DEBUG
 
-    private float _attackDistance = 1.5f;
+    [SerializeField] private EquippedWeaponType _weaponType;
+
+    private TargetingService _targetingService;
+    private IInstantiator _instantiator;
+    private CompositeDisposable _disposables = new();
     private GameObject _handWeapon;
 
-    private void Awake()
+    private float _attackDistance = 1.5f;
+
+    [Inject]
+    public void Construct(IInstantiator instantiator, TargetingService targetingService)
     {
-        _healthComponent.InitializeHealth(_data);
+        _instantiator = instantiator;
+        _healthComponent.InitializeHealth(new HealthData(100, 100)); // Fill with normal data later
+        _targetingService = targetingService;
+        _targetingService.SetCharacter(this);
+
+        _healthComponent.CurrentHp.
+            Subscribe(value => OnHit(value))
+            .AddTo(_disposables);
     }
 
     void Update()
@@ -46,7 +61,7 @@ public class Character : MonoBehaviour
             return;
         }
 
-        _handWeapon = Instantiate(item.Prefab, item.WeaponType.Equals(EquippedWeaponType.Bow) ? _leftHand : _rightHand);
+        _handWeapon = _instantiator.InstantiatePrefab(item.Prefab, item.WeaponType.Equals(EquippedWeaponType.Bow) ? _leftHand : _rightHand);
         _weaponType = item.WeaponType;
         _animationController.ApplyAnimationSet(_weaponType);
         _attackDistance = item.AttackDistance;
@@ -59,6 +74,19 @@ public class Character : MonoBehaviour
     }
 
     public float GetAttackDistance() => _attackDistance;
+
+    private void OnHit(float health)
+    {
+        if (health <= 0)
+        {
+            _animationController.Death();
+            _hitCollider.enabled = false;
+        }
+        else
+        {
+            _animationController.HitVisual();
+        }
+    }
 }
 
 public enum EquippedWeaponType

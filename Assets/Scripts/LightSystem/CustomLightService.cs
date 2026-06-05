@@ -1,41 +1,27 @@
+using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Zenject;
 
-public class CustomLightService : MonoBehaviour
+public class CustomLightService : ITickable, IDisposable
 {
-    [SerializeField] private List<CustomLight> _lightSources = new();
-    [SerializeField] private TextMeshProUGUI _fpsText;
-    [SerializeField] private Transform _player;
-
-    private Queue<int> _fpsQueue = new(30);
+    private List<CustomLight> _lightSources = new();
+    private PoolService _poolService;
     private const int MAX_LIGHTS = 50;
-
+    private const ushort LIGHT_POOL_ID = 0;
     private Vector4[] lightPositions = new Vector4[MAX_LIGHTS];
     private Vector4[] lightColors = new Vector4[MAX_LIGHTS];
-    private float[] lightRadii = new float[MAX_LIGHTS];
+    private float[] lightRadius = new float[MAX_LIGHTS];
 
-    private void Start()
+    [Inject]
+    public void Construct(PoolService poolService)
     {
-        for (int i = 0; i < 30; i++)
-        {
-            _fpsQueue.Enqueue(0);
-        }
+        _poolService = poolService;
     }
 
-    private void LateUpdate()
+    public void Tick()
     {
-        _fpsQueue.Dequeue();
-
-        var median = 0;
-
-        foreach (var item in _fpsQueue)
-        {
-            median += item;
-        }
-
-        _fpsText.text = $"{(int)median / _fpsQueue.Count}";
         if (_lightSources.Count == 0) return;
 
         int count = Mathf.Min(_lightSources.Count, MAX_LIGHTS);
@@ -47,16 +33,16 @@ public class CustomLightService : MonoBehaviour
 
             lightPositions[i] = data;
             lightColors[i] = _lightSources[i].GetColor();
-            lightRadii[i] = data.w;
+            lightRadius[i] = data.w;
         }
+
         CommandBuffer cmd = new();
         cmd.SetGlobalInt("_LightCount", _lightSources.Count);
         cmd.SetGlobalVectorArray("_LightPositions", lightPositions);
         cmd.SetGlobalVectorArray("_LightColors", lightColors);
-        cmd.SetGlobalFloatArray("_LightRadii", lightRadii);
+        cmd.SetGlobalFloatArray("_LightRadius", lightRadius);
         Graphics.ExecuteCommandBuffer(cmd);
         cmd.Release();
-        _fpsQueue.Enqueue((int)(1f / Time.deltaTime));
     }
 
     public void RegisterLightSource(CustomLight source)
@@ -69,7 +55,7 @@ public class CustomLightService : MonoBehaviour
         _lightSources.Remove(source);
     }
 
-    private void OnDisable()
+    public void Dispose()
     {
         CommandBuffer cmd = new();
         cmd.SetGlobalInt("_LightCount", 0);

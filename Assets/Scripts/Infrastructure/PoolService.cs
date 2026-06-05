@@ -1,7 +1,9 @@
+using Cysharp.Threading.Tasks;
 using LeliousExtentions;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
+using Zenject;
 
 public class PoolService
 {
@@ -9,13 +11,22 @@ public class PoolService
     private Dictionary<ushort, Queue<IMapObject>> _notPersistantPool;
     private Dictionary<ushort, MapObject> _cache;
     private ObjectDatabase _database;
+    private Transform _worldParent;
+    private IInstantiator _instantiator;
 
-    public void InitializePool(ObjectDatabase database, int queueCapacity)
+    [Inject]
+    public void Construct(IInstantiator instantiator)
     {
+        _instantiator = instantiator;
+    }
+
+    public async UniTask InitializePool(int queueCapacity, Transform worldParent)
+    {
+        _database = await Addressables.LoadAssetAsync<ObjectDatabase>(AssetPath.ObjectDatabase).ToUniTask();
         _mapPool = new Dictionary<ushort, Queue<IMapObject>>();
         _notPersistantPool = new Dictionary<ushort, Queue<IMapObject>>();
-        _database = database;
         _cache = new Dictionary<ushort, MapObject>();
+        _worldParent = worldParent;
 
         foreach (var p in _database.prefabs)
         {
@@ -55,7 +66,7 @@ public class PoolService
             for (int i = 0; i < queue.Count; i++)
             {
                 var obj = queue.Dequeue();
-                GameObject.Destroy(obj.Transform().gameObject);
+                Addressables.ReleaseInstance(obj.Transform().gameObject);
             }
         }
     }
@@ -124,7 +135,7 @@ public class PoolService
     private IMapObject CreateObject(ushort id)
     {
         _cache.TryGetValue(id, out MapObject result);
-        var instance = GameObject.Instantiate(result.Prefab).GetComponent<IMapObject>();
+        var instance = _instantiator.InstantiatePrefab(result.Prefab, _worldParent).GetComponent<IMapObject>();
         return instance;
     }
 

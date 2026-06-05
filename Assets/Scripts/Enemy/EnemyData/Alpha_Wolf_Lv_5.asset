@@ -12,8 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 15fd2ebfff9dbe84cbe7b765df6f7ac3, type: 3}
   m_Name: Alpha_Wolf_Lv_5
   m_EditorClassIdentifier: 
+  Avatar: {fileID: 9000000, guid: 89709d635456b1242ab79a25b48ee2d8, type: 3}
   Name: Alpha Wolf
   Level: 5
   Health: 800
   Elite: 1
-  FrameScale: 3.1
+  FrameScale: 6

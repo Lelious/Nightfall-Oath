@@ -31,9 +31,6 @@ public class MeshCopier : MonoBehaviour
     private string _saveHeightPath = "Assets/Chunks/HeightMap/";
     private string _saveChunkDataPath = "Assets/Chunks/ChunkData/";
 
-
-    private Texture2D _heightTex;
-
     [ContextMenu("SaveSplatMap")]
     public void SaveSplatMap()
     {
@@ -82,41 +79,6 @@ public class MeshCopier : MonoBehaviour
         Debug.Log("Splatmaps exported!");
     }
 
-    //[ContextMenu("GenerateNavQuads")]
-    //public void GenerateNavQuads()
-    //{
-    //    var mesh = _copyObject.GetComponent<MeshFilter>().sharedMesh;
-    //    var verts = mesh.vertices;
-    //    var gridSize = 64;
-
-    //    for (int z = 0; z < gridSize; z ++)
-    //    {
-    //        for (int x = 0; x < gridSize; x++)
-    //        {
-    //            int i0 = z * gridSize + x;
-
-    //            Vector3 p0 = _copyObject.transform.TransformPoint(verts[i0]);
-
-    //            Vector3 normal = _copyObject.transform.TransformDirection(mesh.normals[i0]).normalized;
-
-    //            Vector3 baseForward = Vector3.forward;
-    //            Vector3 forward = Vector3.ProjectOnPlane(baseForward, normal).normalized;
-
-    //            if (forward.sqrMagnitude < 0.001f)
-    //            {
-    //                baseForward = Vector3.right;
-    //                forward = Vector3.ProjectOnPlane(baseForward, normal).normalized;
-    //            }
-
-    //            Quaternion rot = Quaternion.LookRotation(forward, normal);
-
-    //            GameObject quad = Instantiate(_navQuad);
-    //            quad.transform.position = p0;
-    //            quad.transform.rotation = rot;
-    //        }
-    //    }
-    //}
-
     [ContextMenu("ConvertTrees")]
     public void ConvertTrees()
     {
@@ -140,14 +102,18 @@ public class MeshCopier : MonoBehaviour
     [ContextMenu("BakeChunkObjects")]
     public void BakeChunkObjects()
     {
-        var allObjects = FindObjectsByType<MapEnviromentObject>(
+        var mapEnviroment = FindObjectsByType<MapEnviromentObject>(
+            FindObjectsInactive.Include,
+            FindObjectsSortMode.None
+        );
+        var mapCreatures = FindObjectsByType<EnemyBuildMarker>(
             FindObjectsInactive.Include,
             FindObjectsSortMode.None
         );
         var chunkMap = new Dictionary<Vector2Int, List<IMapObject>>();
         if (!Directory.Exists(_saveChunkDataPath))
             Directory.CreateDirectory(_saveChunkDataPath);
-        foreach (var obj in allObjects)
+        foreach (var obj in mapEnviroment)
         {
             if (obj is IMapObject mapObj)
             {
@@ -162,6 +128,22 @@ public class MeshCopier : MonoBehaviour
                 Debug.Log($"Find map object ID : {mapObj.Id()}");
 
                 chunkMap[coord].Add(mapObj);
+            }
+        }
+
+        foreach (var item in mapCreatures)
+        {
+            if (item is IMapCreature mapCreature)
+            {
+                Vector3 pos = mapCreature.Position() - _startPos;
+                int chunkX = Mathf.FloorToInt((pos.x + 50f) / 100f);
+                int chunkZ = Mathf.FloorToInt((pos.z + 50f) / 100f);
+                Vector2Int coord = new Vector2Int(chunkX, chunkZ);
+
+                if (!chunkMap.ContainsKey(coord))
+                    chunkMap[coord] = new List<IMapObject>();
+
+                chunkMap[coord].Add(mapCreature);
             }
         }
 

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -7,6 +6,7 @@ public static class BinaryChunkSerializer
 {
     private const float Range = 1000f;
     private const float ScaleMax = 300f;
+    private const ushort ENEMY_BASE_ID = 20;
 
     public static byte[] Serialize(IMapObject[] objects)
     {
@@ -21,6 +21,14 @@ public static class BinaryChunkSerializer
                 WriteVector3Ushort(writer, obj.Position(), Range, false);
                 WriteRotationEuler(writer, obj.Rotation());
                 WriteVector3Ushort(writer, obj.Scale(), ScaleMax, false);
+
+                if (obj is IMapCreature creature)
+                {
+                    var (type, level, elite) = creature.GetCreatureTypeAndLvl();
+                    writer.Write(type);
+                    writer.Write(level);
+                    writer.Write(elite);
+                }
             }
             return ms.ToArray();
         }
@@ -35,7 +43,23 @@ public static class BinaryChunkSerializer
             int count = reader.ReadInt32();
             for (int i = 0; i < count; i++)
             {
-                list.Add(new MapObjectInfo(reader.ReadUInt16(), ReadVector3Ushort(reader, Range, false), ReadRotationEuler(reader), ReadVector3Ushort(reader, ScaleMax, false)));
+                ushort id = reader.ReadUInt16();
+                Vector3 pos = ReadVector3Ushort(reader, Range, false);
+                Quaternion rot = ReadRotationEuler(reader);
+                Vector3 scale = ReadVector3Ushort(reader, ScaleMax, false);
+
+                if (id == ENEMY_BASE_ID)
+                {
+                    byte creatureType = reader.ReadByte();
+                    ushort level = reader.ReadUInt16();
+                    bool elite = reader.ReadBoolean();
+
+                    list.Add(new MapCreatureInfo(id, pos, rot, scale, creatureType, level, elite));
+                }
+                else
+                {
+                    list.Add(new MapObjectInfo(id, pos, rot, scale));
+                }
             }
         }
 

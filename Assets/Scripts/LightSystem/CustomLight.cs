@@ -1,10 +1,35 @@
 using UnityEngine;
+using Zenject;
 
 public class CustomLight : MonoBehaviour
 {
     [ColorUsage(true, true)][SerializeField] private Color _color;
     [SerializeField] private float _radius;
     [SerializeField] private float _intensity;
+    [SerializeField] private float _flickerSpeed = 8.0f;
+    [SerializeField] private bool _flickering;
+
+    private CustomLightService _lightService;
+    private float _finalIntensity;
+
+    public void LateUpdate()
+    {
+        if (_flickering)
+        {
+            float noise = Mathf.Sin(Time.timeSinceLevelLoad * _flickerSpeed) * Mathf.Cos(Time.timeSinceLevelLoad * _flickerSpeed * 0.7f);
+
+            float modifier = Mathf.Lerp(0.7f, 1.0f, (noise + 1f) * 0.5f);
+
+            _finalIntensity = _intensity * modifier;
+        }
+    }
+
+    [Inject]
+    public void Construct(CustomLightService lightService)
+    {
+        _lightService = lightService;
+        _finalIntensity = _intensity;
+    }
 
     public Vector4 GetData()
     {
@@ -13,7 +38,7 @@ public class CustomLight : MonoBehaviour
 
     public Vector4 GetColor()
     {
-        Color final = _color * _intensity;
+        Color final = _color * _finalIntensity;
         return new Vector4(final.r, final.g, final.b, 1f);
     }
 
@@ -25,11 +50,11 @@ public class CustomLight : MonoBehaviour
 
     private void OnEnable()
     {
-        FindAnyObjectByType<CustomLightService>().RegisterLightSource(this);
+        _lightService.RegisterLightSource(this);
     }
 
     private void OnDisable()
     {
-        FindAnyObjectByType<CustomLightService>().UnregisterLightSource(this);
+        _lightService.UnregisterLightSource(this);
     }
 }
