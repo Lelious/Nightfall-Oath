@@ -1,65 +1,93 @@
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using Zenject;
 
-public class CustomLightService : ITickable, IDisposable
+public class CustomLightService : IInitializable, ITickable, IDisposable
 {
-    private List<CustomLight> _lightSources = new();
-    private PoolService _poolService;
     private const int MAX_LIGHTS = 50;
-    private const ushort LIGHT_POOL_ID = 0;
-    private Vector4[] lightPositions = new Vector4[MAX_LIGHTS];
-    private Vector4[] lightColors = new Vector4[MAX_LIGHTS];
-    private float[] lightRadius = new float[MAX_LIGHTS];
+    private readonly CustomLight[] _lightSources = new CustomLight[MAX_LIGHTS];
 
-    [Inject]
-    public void Construct(PoolService poolService)
+    private readonly System.Collections.Generic.List<Vector4> _lightPositions = new(MAX_LIGHTS);
+    private readonly System.Collections.Generic.List<Vector4> _lightColors = new(MAX_LIGHTS);
+    private readonly System.Collections.Generic.List<float> _lightRadius = new(MAX_LIGHTS);
+
+    private CommandBuffer _cmd;
+    private int count;
+
+    public void Initialize()
     {
-        _poolService = poolService;
+        _cmd = new CommandBuffer { name = "CustomLightingUpdate" };
+
+        for (int i = 0; i < MAX_LIGHTS; i++)
+        {
+            _lightPositions.Add(Vector4.zero);
+            _lightColors.Add(Vector4.zero);
+            _lightRadius.Add(0f);
+        }
     }
 
     public void Tick()
     {
-        if (_lightSources.Count == 0) return;
-
-        int count = Mathf.Min(_lightSources.Count, MAX_LIGHTS);
+        if (count == 0)
+        {
+            _cmd.Clear();
+            _cmd.SetGlobalInt("_LightCount", 0);
+            Graphics.ExecuteCommandBuffer(_cmd);
+            return;
+        }
 
         for (int i = 0; i < count; i++)
         {
-            if (_lightSources[i] == null) continue;
-            var data = _lightSources[i].GetData();
+            Vector4 data = _lightSources[i].GetData();
 
-            lightPositions[i] = data;
-            lightColors[i] = _lightSources[i].GetColor();
-            lightRadius[i] = data.w;
+            _lightPositions[i] = data;
+            _lightColors[i] = _lightSources[i].GetColor();
+            _lightRadius[i] = data.w;
         }
 
-        CommandBuffer cmd = new();
-        cmd.SetGlobalInt("_LightCount", _lightSources.Count);
-        cmd.SetGlobalVectorArray("_LightPositions", lightPositions);
-        cmd.SetGlobalVectorArray("_LightColors", lightColors);
-        cmd.SetGlobalFloatArray("_LightRadius", lightRadius);
-        Graphics.ExecuteCommandBuffer(cmd);
-        cmd.Release();
+        _cmd.Clear();
+        _cmd.SetGlobalInt("_LightCount", count);
+
+        _cmd.SetGlobalVectorArray("_LightPositions", _lightPositions);
+        _cmd.SetGlobalVectorArray("_LightColors", _lightColors);
+        _cmd.SetGlobalFloatArray("_LightRadius", _lightRadius);
+
+        Graphics.ExecuteCommandBuffer(_cmd);
     }
 
     public void RegisterLightSource(CustomLight source)
     {
-        _lightSources.Add(source);
+        if (count >= MAX_LIGHTS) return;
+
+        _lightSources[count] = source;
+        count++;
     }
 
     public void UnregisterLightSource(CustomLight source)
     {
-        _lightSources.Remove(source);
+        for (int i = 0; i < count; i++)
+        {
+            if (_lightSources[i] == source)
+            {
+                _lightSources[i] = _lightSources[count - 1];
+                _lightSources[count - 1] = null;
+                count--;
+                break;
+            }
+        }
     }
 
     public void Dispose()
     {
-        CommandBuffer cmd = new();
-        cmd.SetGlobalInt("_LightCount", 0);
-        Graphics.ExecuteCommandBuffer(cmd);
-        cmd.Release();
+        if (_cmd != null)
+        {
+            _cmd.Clear();
+            _cmd.SetGlobalInt("_LightCount", 0);
+            Graphics.ExecuteCommandBuffer(_cmd);
+
+            _cmd.Release();
+            _cmd = null;
+        }
     }
 }

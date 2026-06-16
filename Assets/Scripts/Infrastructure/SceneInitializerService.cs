@@ -28,13 +28,14 @@ public class SceneInitializerService : IInitializable, IDisposable
         var playerHUDHandle = Addressables.LoadAssetAsync<GameObject>(AssetPath.PlayerHUD);
         var interfaceUiHandle = Addressables.LoadAssetAsync<GameObject>(AssetPath.InterfaceUI);
         var screenTargetHandle = Addressables.LoadAssetAsync<GameObject>(AssetPath.ScreenTargetSelector);
+        var floatingTextHandle = Addressables.LoadAssetAsync<GameObject>(AssetPath.FloatingTextService);
 
         _assetHandles.AddRange(new AsyncOperationHandle[]
         {
-            navMeshHandle, chunkHandle, heroHandle, cameraHandle, playerHUDHandle, interfaceUiHandle, screenTargetHandle
+            navMeshHandle, chunkHandle, heroHandle, cameraHandle, playerHUDHandle, interfaceUiHandle, screenTargetHandle, floatingTextHandle
         });
 
-        var (navMeshPrefab, chunkPrefab, heroPrefab, cameraPrefab, playerHUDPrefab, interfaceUiPrefab, screenTargetPrefab) =
+        var (navMeshPrefab, chunkPrefab, heroPrefab, cameraPrefab, playerHUDPrefab, interfaceUiPrefab, screenTargetPrefab, floatingTextPrefab) =
             await UniTask.WhenAll(
                 navMeshHandle.ToUniTask(),
                 chunkHandle.ToUniTask(),
@@ -42,11 +43,17 @@ public class SceneInitializerService : IInitializable, IDisposable
                 cameraHandle.ToUniTask(),
                 playerHUDHandle.ToUniTask(),
                 interfaceUiHandle.ToUniTask(),
-                screenTargetHandle.ToUniTask()
+                screenTargetHandle.ToUniTask(),
+                floatingTextHandle.ToUniTask()
             );
 
-        var cameraObj = _instantiator.InstantiatePrefab(cameraPrefab);
+        var floatingTextObj = _instantiator.InstantiatePrefab(floatingTextPrefab);
+        var floatingTextService = floatingTextObj.GetComponent<FloatingTextService>();
 
+        _container.BindInstance(floatingTextService).AsSingle().NonLazy();
+        _container.Bind<DamageProcessService>().AsSingle();
+
+        var cameraObj = _instantiator.InstantiatePrefab(cameraPrefab);
         var heroObj = _instantiator.InstantiatePrefab(heroPrefab);
         var hero = heroObj.GetComponent<Character>();
         _container.BindInstance(hero).AsSingle();

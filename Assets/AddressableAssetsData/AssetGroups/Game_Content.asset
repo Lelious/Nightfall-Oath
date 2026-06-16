@@ -1,0 +1,108 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: Game_Content
+  m_EditorClassIdentifier: Unity.Addressables.Editor::UnityEditor.AddressableAssets.Settings.AddressableAssetGroup
+  m_GroupName: Game_Content
+  m_GUID: 73dc089c7e7dcab4a9450b2472327b03
+  m_SerializeEntries:
+  - m_GUID: 1713a194995913c41ada2d1b083f4ce0
+    m_Address: LightSource
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 250e01acdfabe154cae64a7b586269b1
+    m_Address: ObjectDatabase
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3e66ee445e5128746b0312ed7226e1ff
+    m_Address: Bow10
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 46874b58207a88c49a26ec902d426ef3
+    m_Address: EnemyBase
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 49fb24dbc72756142a37618d5bbb0806
+    m_Address: CameraParent
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 57ca1ff77b1919f46aa76c5f58b74a40
+    m_Address: InterfaceUI
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 669b92aa9c7cb8a45a5dd115774dc2e2
+    m_Address: FloatingTextService
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 7eb5011c8c613534f9747c2067127015
+    m_Address: ChunkGenerator
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8ae4dc0296c31c94e95d5fd2faa2c838
+    m_Address: Chunk
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: be726b2a2d50cef42bba2f182b598a58
+    m_Address: ShortBow
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c01356c5bff2cc345a1929e7faaa4412
+    m_Address: PlayerHUD
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c3a923791773bd84eacf71db6b3e46a5
+    m_Address: Textures
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: d8fb62a0657580845b0ee62dc58919d7
+    m_Address: NavMeshBuilder
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e52c29cf40d70e240b8124bc36bebc42
+    m_Address: CharacterMale
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f45dd9398f9f3ff4ba94d1dbf0b842f5
+    m_Address: CreatureDatabase
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f8243bb353e5cb74481bb26fe62fd298
+    m_Address: Wolf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fd379613d3cff3e45af99cc6335c6d59
+    m_Address: ScreenTargetSelector
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 38c26b1e4d56e4b49b3eb45ac985a962, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: d2c1bf64f07d44e47a8f62e25f3d2664, type: 2}
+    - {fileID: 11400000, guid: 1453eeb8ac51ffc469046c4800d422a2, type: 2}

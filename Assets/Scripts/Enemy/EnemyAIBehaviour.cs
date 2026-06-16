@@ -7,6 +7,7 @@ public class EnemyAIBehaviour : MonoBehaviour
     [SerializeField] private MovementComponent _movementComponent;
     [SerializeField] private Enemy _enemy;
 
+    private DamageProcessService _damageProcessService;
     private TargetingService _targetingService;
     private Character _character;
     private Coroutine _aiRoutine;
@@ -16,9 +17,10 @@ public class EnemyAIBehaviour : MonoBehaviour
 
     public void SetInitialPosition(Vector3 position) => _initialPosition = position;
 
-    public void RunBehaviour(TargetingService targetingService)
+    public void RunBehaviour(TargetingService targetingService, DamageProcessService damageService)
     {
-        _targetingService = targetingService;       
+        _targetingService = targetingService;
+        _damageProcessService = damageService;
         _currentState = AIBehaviourState.Idle;
 
         _aiRoutine = StartCoroutine(AIBehaviourRoutine());
@@ -84,7 +86,7 @@ public class EnemyAIBehaviour : MonoBehaviour
         {
             return false;
         }
-        _attackComponent.SetCharacter(_character);
+        _attackComponent.InitializeComponent(_character, _damageProcessService);
 
         if (Vector3.Distance(transform.position, _character.transform.position) <= 8f && _character.GetHealth().IsAlive()) 
             return true;

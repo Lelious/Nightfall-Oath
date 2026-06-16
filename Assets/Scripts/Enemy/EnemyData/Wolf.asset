@@ -15,7 +15,7 @@ MonoBehaviour:
   AssetAddress: Wolf
   Name: Wolf
   Avatar: {fileID: 9000000, guid: 89709d635456b1242ab79a25b48ee2d8, type: 3}
-  FrameScale: 4
+  FrameScale: 8
   BaseHealth: 500
   BaseDamage: 10
   AttackSpeed: 1

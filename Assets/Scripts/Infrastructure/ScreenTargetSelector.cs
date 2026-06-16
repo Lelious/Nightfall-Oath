@@ -69,7 +69,6 @@ public class ScreenTargetSelector : MonoBehaviour, IDisposable
         {           
             if (hit.collider.TryGetComponent<Enemy>(out var enemy))
             {
-                Debug.Log("pppppp");
                 _inputService.SetTarget(enemy, false);
             }
         }

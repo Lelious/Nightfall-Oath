@@ -11,4 +11,6 @@ public static class AssetPath
     public const string ScreenTargetSelector = "ScreenTargetSelector";
     public const string CreatureDatabase = "CreatureDatabase";
     public const string ObjectDatabase = "ObjectDatabase";
+    public const string FloatingTextService = "FloatingTextService";
+    public const string StaticMeshesDatabase = "StaticMeshes";
 }

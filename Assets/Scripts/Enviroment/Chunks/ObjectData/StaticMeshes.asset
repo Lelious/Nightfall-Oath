@@ -1,0 +1,105 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d20111925dbf1ec4bbe3a0e468afd565, type: 3}
+  m_Name: StaticMeshes
+  m_EditorClassIdentifier: Assembly-CSharp::MeshMaterialConfig
+  allMeshes:
+  - Name: Tree
+    Id: 3
+    meshReference:
+      m_AssetGUID: 9d16e4e723fa5d24ba06867852c46b9e
+      m_SubObjectName: Cylinder.014
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: baa2254f39c22cb4388efd38523ec778, type: 2}
+    - {fileID: 2100000, guid: 0d5ea65e91f99dc408598087bbde65ae, type: 2}
+  - Name: Cliff
+    Id: 14
+    meshReference:
+      m_AssetGUID: 4d283e9b14e7be94aa7090111a56eac8
+      m_SubObjectName: Plane.245
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: Fern_1
+    Id: 4
+    meshReference:
+      m_AssetGUID: e55d0a0457a69354fa4941e979bebf4c
+      m_SubObjectName: Plane.233
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: 109bb403c3e750446bb0a248fdbbffba, type: 2}
+  - Name: Fern_2
+    Id: 5
+    meshReference:
+      m_AssetGUID: e292589cd9da39a4590156213396227b
+      m_SubObjectName: Plane.232
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: 109bb403c3e750446bb0a248fdbbffba, type: 2}
+  - Name: Fern_3
+    Id: 6
+    meshReference:
+      m_AssetGUID: f7f451a72e7fd0a438b6b0a54bbc6647
+      m_SubObjectName: Plane.231
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: 109bb403c3e750446bb0a248fdbbffba, type: 2}
+  - Name: BridgeBase
+    Id: 29
+    meshReference:
+      m_AssetGUID: 04ec532cd8c96cc46905d0aed8334f2a
+      m_SubObjectName: Cube.032
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: BridgeWalk
+    Id: 28
+    meshReference:
+      m_AssetGUID: 57f80ce547754754b9ded7d579a1c81e
+      m_SubObjectName: Cube.033
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: 33b04e7b3ab500d47b260f137f5cc122, type: 2}
+  - Name: HouseCorner_1x1
+    Id: 30
+    meshReference:
+      m_AssetGUID: 62161956d1e3ea24eb24a8d70530bd87
+      m_SubObjectName: Plane.094
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}

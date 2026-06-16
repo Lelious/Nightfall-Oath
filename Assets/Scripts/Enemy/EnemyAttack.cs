@@ -11,8 +11,13 @@ public class EnemyAttack : AttackComponent
     private Coroutine _chaseRoutine;
     private float _attackDistance;
     private Character _targetToChase;
+    private DamageProcessService _damageService;
 
-    public void SetCharacter(Character character) => _targetToChase = character;
+    public void InitializeComponent(Character character, DamageProcessService damageService)
+    {
+        _targetToChase = character;
+        _damageService = damageService;
+    }
 
     public override void MakeAttack()
     {
@@ -24,7 +29,7 @@ public class EnemyAttack : AttackComponent
         {
             if (_targetToChase != null && _targetToChase.GetHealth().IsAlive())
             {
-                _targetToChase.GetHealth().TakeDamage(Random.Range(_minAttack, _maxAttack));
+                _damageService.ProcessDamage(_targetToChase.GetHealth(), Random.Range(_minAttack, _maxAttack), DamageSource.Player);
             }
         }
     }

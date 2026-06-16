@@ -22,18 +22,6 @@ MonoBehaviour:
   - ID: 2
     Persistent: 0
     Prefab: {fileID: 5819368409346793244, guid: 3cfe09a89c936ac43915a924e490a83b, type: 3}
-  - ID: 3
-    Persistent: 1
-    Prefab: {fileID: 1158215933970571388, guid: 524f9ef4e623d5f41bc8c6c2c8a8ede1, type: 3}
-  - ID: 4
-    Persistent: 1
-    Prefab: {fileID: 5907165157807442162, guid: aa9ab6722f6c94848b39023d09277159, type: 3}
-  - ID: 5
-    Persistent: 1
-    Prefab: {fileID: 8051894400202491744, guid: 2e366304b9cb9534b8a62f804fb0f5dd, type: 3}
-  - ID: 6
-    Persistent: 1
-    Prefab: {fileID: 3381748246862195010, guid: 62828a17908a77e4791307122bb2084e, type: 3}
   - ID: 7
     Persistent: 1
     Prefab: {fileID: 8806150154909185801, guid: bca0beb6ed088824480f627df9ca98f4, type: 3}
@@ -55,9 +43,6 @@ MonoBehaviour:
   - ID: 13
     Persistent: 0
     Prefab: {fileID: 8127663588447594727, guid: d39626af596799c45b2956bf70563b32, type: 3}
-  - ID: 14
-    Persistent: 1
-    Prefab: {fileID: 614949807107156739, guid: f0a941a989b85c44496d3b138deb04b4, type: 3}
   - ID: 15
     Persistent: 0
     Prefab: {fileID: 2597288146500840782, guid: 92c5af53bb7b545479519254bfe97f26, type: 3}

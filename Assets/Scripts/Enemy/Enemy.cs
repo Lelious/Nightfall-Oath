@@ -19,7 +19,8 @@ public class Enemy : MonoBehaviour, IMapCreature
     [SerializeField] private EquippedWeaponType _weaponType;
 
     private readonly CompositeDisposable _disposables = new();
-    private TargetingService _targetingService;
+    private DamageProcessService _damageService;
+    private TargetingService _targetingService;    
     private EnemyRuntimeData _runtimeData;
     private EnemyFactory _enemyFactory;
     private GameObject _view;
@@ -42,14 +43,14 @@ public class Enemy : MonoBehaviour, IMapCreature
     public Vector3 Scale() => transform.localScale;
     public GameObject GetCreatureView() => _view;
     public Transform Transform() => transform;
-    public bool PersistentObject() => true;
     public ushort Id() => _id;
 
     [Inject]
-    public void Construct(TargetingService targetingService, EnemyFactory factory)
+    public void Construct(TargetingService targetingService, EnemyFactory factory, DamageProcessService damageService)
     {
         _targetingService = targetingService;
         _enemyFactory = factory;
+        _damageService = damageService;
     }
 
     public void SetupCreatureMapInfo(byte creatureType, ushort level)
@@ -83,7 +84,7 @@ public class Enemy : MonoBehaviour, IMapCreature
         animator.Update(0f);
 
         _aiBehaviour.SetInitialPosition(transform.position);
-        _aiBehaviour.RunBehaviour(_targetingService);
+        _aiBehaviour.RunBehaviour(_targetingService, _damageService);
         _healthComponent.InitializeHealth(new HealthData(_runtimeData.MaxHealth, 0)); 
         _animationController.ApplyAnimationSet(_weaponType);
         _targetingService.AddEnemyToTargeting(this);
@@ -114,4 +115,6 @@ public class Enemy : MonoBehaviour, IMapCreature
         await UniTask.WaitForSeconds(3f);
         _enemyFactory.DestroyEnemy(this);
     }
+
+    public MapObjectType ObjType() => MapObjectType.Creature;
 }

@@ -7,7 +7,7 @@ public interface IMapObject
     public Vector3 Position();
     public Quaternion Rotation();
     public Vector3 Scale();
-    public bool PersistentObject();
+    public MapObjectType ObjType();
     public void SetActive(bool active);
     public void SetPosition(Vector3 position);
     public void SetRotation(Quaternion rotation);

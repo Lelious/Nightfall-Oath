@@ -20,11 +20,6 @@ Shader "Unlit/SimpleLightShaderGround"
         _NoiseScale ("NoiseScale", Float) = 0
         _MatcapIntensity ("MatcapIntensity", Float) = 0
         _Fade ("Fade", Float) = 0
-        _FogColor ("Fog Color", Color) = (0.5,0.6,0.7,1)
-        _FogStart ("Fog Start", Float) = 10
-        _FogEnd ("Fog End", Float) = 60
-        _FogHeight ("Fog Height", Float) = 2
-        _FogDensity ("Fog Density", Float) = 0.5
     }
 
     SubShader 
@@ -53,14 +48,14 @@ Shader "Unlit/SimpleLightShaderGround"
 
             #pragma vertex Vertex 
             #pragma fragment Fragment 
-            #pragma prefer_hlslcc gles 
             #pragma exclude_renderers d3d11_9x 
             #pragma shader_feature _LIGHTMODE_UNLIT _LIGHTMODE_LIT 
-            #pragma shader_feature _FORWARD_PLUS 
+            #pragma multi_compile _ _FORWARD_PLUS  
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS 
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN 
             #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS 
             #pragma multi_compile _ _SHADOWS_SOFT 
+            #pragma multi_compile_instancing
             #pragma target 2.0
 
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
@@ -72,6 +67,7 @@ Shader "Unlit/SimpleLightShaderGround"
                 float3 normalOS   : NORMAL;
                 float4 tangentOS  : TANGENT;
                 float2 uv         : TEXCOORD0;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct Varyings
@@ -84,6 +80,7 @@ Shader "Unlit/SimpleLightShaderGround"
                 float3 viewDirTS   : TEXCOORD4;
                 float3 bitangentWS : TEXCOORD6;
                 half fogFactor : TEXCOORD7;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
@@ -93,11 +90,19 @@ Shader "Unlit/SimpleLightShaderGround"
             TEXTURE2D(_DissolveTex); SAMPLER(sampler_DissolveTex);
             TEXTURE2D(_MatcapTex); SAMPLER(sampler_MatcapTex);
 
-            #define MAX_BUFFER_LENGTH 50 
-            float4 _LightPositions[MAX_BUFFER_LENGTH]; 
-            float4 _LightColors[MAX_BUFFER_LENGTH]; 
-            float _LightRadius[MAX_BUFFER_LENGTH]; 
-            float _LightCount;
+            CBUFFER_START(_CustomLightingBuffer)
+                #define MAX_BUFFER_LENGTH 50 
+                float4 _LightPositions[MAX_BUFFER_LENGTH]; 
+                float4 _LightColors[MAX_BUFFER_LENGTH]; 
+                float _LightRadius[MAX_BUFFER_LENGTH]; 
+                half _LightCount;
+            CBUFFER_END
+
+            CBUFFER_START(_GlobalFogBuffer)
+                half4 _FogColor;
+                float _FogStart;
+                float _FogEnd;
+            CBUFFER_END
 
             CBUFFER_START(UnityPerMaterial)
                 half4 _BaseColor;
@@ -114,16 +119,14 @@ Shader "Unlit/SimpleLightShaderGround"
                 half _Tile;
                 half _EdgePadding;
                 half _WorldSize;
-                half4 _FogColor;
-                half _FogStart;
-                half _FogEnd;
-                half _FogHeight;
-                half _FogDensity;
             CBUFFER_END
 
             Varyings Vertex(Attributes v)
             {
                 Varyings o;
+
+                UNITY_SETUP_INSTANCE_ID(v);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
 
                 o.positionWS = TransformObjectToWorld(v.positionOS);
                 o.positionCS = TransformWorldToHClip(o.positionWS);
@@ -210,12 +213,7 @@ Shader "Unlit/SimpleLightShaderGround"
                 half4 c2 = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uvAtlas + o2);
                 half4 c3 = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, uvAtlas + o3);
 
-                half4 color =
-                    c0 * mask.r +
-                    c1 * mask.g +
-                    c2 * mask.b +
-                    c3 * mask.a;
-
+                half4 color = c0 * mask.r + c1 * mask.g + c2 * mask.b + c3 * mask.a;
                 color *= _BaseColor;
 
                 half4 n0 = SAMPLE_TEXTURE2D(_NormalMap, sampler_NormalMap, uvAtlas + o0);
@@ -237,12 +235,8 @@ Shader "Unlit/SimpleLightShaderGround"
                 half3 arm2 = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, uvAtlas + o2).rgb;
                 half3 arm3 = SAMPLE_TEXTURE2D(_AORoughnessMetallicMap, sampler_AORoughnessMetallicMap, uvAtlas + o3).rgb;
 
-                half3 ARM =
-                    arm0 * mask.r +
-                    arm1 * mask.g +
-                    arm2 * mask.b +
-                    arm3 * mask.a; 
-                    
+                half3 ARM = arm0 * mask.r + arm1 * mask.g + arm2 * mask.b + arm3 * mask.a; 
+        
                 half3 viewDir = normalize(GetWorldSpaceViewDir(v.positionWS));
 
                 half metalMask = saturate(ARM.b);
@@ -255,23 +249,22 @@ Shader "Unlit/SimpleLightShaderGround"
                 lighting.shadowCoord = TransformWorldToShadowCoord(v.positionWS);
                 lighting.viewDirectionWS = viewDir;
                 lighting.normalWS = normalWS;
-                lighting.bakedGI = max(ambient, 0.15);
+                lighting.bakedGI = max(ambient, 0.15h);
 
                 SurfaceData surface = (SurfaceData)0;
                 surface.albedo = color.rgb;
-                surface.alpha = 1;
+                surface.alpha = 1.0h;
                 surface.occlusion = ARM.r;
-                surface.metallic = 0;
+                surface.metallic = 0.0h;
                 surface.smoothness = smoothness;
 
                 half4 col = UniversalFragmentBlinnPhong(lighting, surface);
 
                 half3 customLightAccum = 0;
-
                 half specMul = lerp(0.2h, 2.5h, metalMask);
                 half diffMul = (1.0h - metalMask);
-                half mainLightIntensity = dot(_MainLightColor.rgb, half3(0.2126, 0.7152, 0.0722)); 
-                half additionalLightFactor = lerp(1.0, 0.1, saturate(mainLightIntensity));
+                half mainLightIntensity = dot(_MainLightColor.rgb, half3(0.2126h, 0.7152h, 0.0722h)); 
+                half additionalLightFactor = lerp(1.0h, 0.1h, saturate(mainLightIntensity));
 
                 for (int idx = 0; idx < _LightCount; idx++)
                 {
@@ -283,8 +276,7 @@ Shader "Unlit/SimpleLightShaderGround"
                     half distSqr = dot(L, L);
                     half radiusSqr = radius * radius;
 
-                    if (distSqr > radiusSqr)
-                        continue;
+                    if (distSqr > radiusSqr) continue;
 
                     half invDist = rsqrt(distSqr);
                     L *= invDist;
@@ -293,14 +285,12 @@ Shader "Unlit/SimpleLightShaderGround"
                     falloff *= falloff;
 
                     half diffuse = saturate(dot(normalWS, L));
-
-                    if(diffuse <= 0)
-                        continue;
+                    if (diffuse <= 0) continue;
 
                     half3 H = normalize(L + viewDir);
                     half NdotH = saturate(dot(normalWS, H));
 
-                    half specular = pow(NdotH, 32.0);
+                    half specular = pow(NdotH, 32.0h);
                     specular *= smoothness;
 
                     diffuse *= diffMul;
@@ -310,7 +300,6 @@ Shader "Unlit/SimpleLightShaderGround"
                 }
 
                 customLightAccum *= additionalLightFactor;
-
                 col.rgb += customLightAccum * color.rgb;
 
                 half3 normalVS = mul((half3x3)UNITY_MATRIX_V, normalWS);
@@ -320,22 +309,21 @@ Shader "Unlit/SimpleLightShaderGround"
                 matcapUV.y = 1.0h - matcapUV.y;
 
                 half3 matcap = SAMPLE_TEXTURE2D(_MatcapTex, sampler_MatcapTex, matcapUV).rgb;
-
                 half fresnel = pow(1.0h - saturate(dot(normalWS, viewDir)), 4.0h);
 
-                half matcapPower = metalMask * _MatcapIntensity;
-
                 col.rgb += matcap * metalMask * _MatcapIntensity * (1.0h + fresnel);
-                float finnoise = frac(sin(dot(v.positionCS.xy , float2(12.9898,78.233))) * 43758.5453);
-                col.rgb += (finnoise - 0.5) * 0.003;
+
+                float finnoise = frac(sin(dot(v.positionCS.xy, float2(12.9898f, 78.233f))) * 43758.5453f);
+                col.rgb += (finnoise - 0.5h) * 0.003h;
+
                 half3 camPos = _WorldSpaceCameraPos;
                 half dist = length(camPos - v.positionWS);
 
                 half fogFactor = saturate((dist - _FogStart) / (_FogEnd - _FogStart));
-                half3 adjustedFogColor = _FogColor.rgb * mainLight.color;
-                fogFactor = smoothstep(0.0, 1.0, fogFactor);
-                col.rgb = lerp(col.rgb, adjustedFogColor, fogFactor);
-                return half4(col.rgb, 1);
+    
+                col.rgb = lerp(col.rgb, _FogColor.rgb, fogFactor);
+
+                return half4(col.rgb, 1.0h);
             }
             ENDHLSL
         }

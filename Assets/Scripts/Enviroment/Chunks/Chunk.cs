@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
-using UnityEngine.AI;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
 public class Chunk : MonoBehaviour
@@ -13,11 +11,11 @@ public class Chunk : MonoBehaviour
     [HideInInspector] public Mesh Mesh;
 
     public Vector2Int GridPosition;
+    public Vector2Int OldGridPosition;
     public NativeArray<float3> Vertices;
     public NativeArray<float3> Normals;
 
     private List<MapObjectInfo> _chunkObjectsInfo;
-    private AsyncOperationHandle<Mesh> _navigationMeshHandle;
 
     public void CreateChunkData()
     {
@@ -36,40 +34,16 @@ public class Chunk : MonoBehaviour
     public void AssignMesh() => _meshFilter.mesh = Mesh;
     public List<MapObjectInfo> GetChunkObjectsInfoList() => _chunkObjectsInfo;
 
-    public async UniTask InitializeChunk(List<MapObjectInfo> chunkObjects) 
+    public void InitializeChunk(List<MapObjectInfo> chunkObjects) 
     {
-        _chunkObjectsInfo = chunkObjects;
+        if (_chunkObjectsInfo == null)
+            _chunkObjectsInfo = new List<MapObjectInfo>(100);
+        else
+            _chunkObjectsInfo.Clear();
 
-        if (_navigationMeshHandle.IsValid())
-            Addressables.Release(_navigationMeshHandle);
-
-        var locationsHandle = Addressables.LoadResourceLocationsAsync($"ChunkNav_{GridPosition.x}_{GridPosition.y}");
-        await locationsHandle.ToUniTask();
-
-        if (locationsHandle.Status == AsyncOperationStatus.Succeeded &&
-                locationsHandle.Result != null &&
-                locationsHandle.Result.Count > 0)
+        foreach (var item in chunkObjects)
         {
-            _navigationMeshHandle = Addressables.LoadAssetAsync<Mesh>($"ChunkNav_{GridPosition.x}_{GridPosition.y}");
-            await _navigationMeshHandle.ToUniTask();
+            _chunkObjectsInfo.Add(item);
         }
-        Addressables.Release(locationsHandle);
-    }
-
-    public void FillNavSource(List<NavMeshBuildSource> sources)
-    {
-        if (_navigationMeshHandle.IsValid() &&
-        _navigationMeshHandle.Status == AsyncOperationStatus.Succeeded)
-        {
-            Mesh mesh = _navigationMeshHandle.Result;
-            sources.Add(new NavMeshBuildSource
-            {
-                shape = NavMeshBuildSourceShape.Mesh,
-                sourceObject = mesh,
-                transform = transform.localToWorldMatrix,
-                area = 0
-            });
-        }
-
     }
 }

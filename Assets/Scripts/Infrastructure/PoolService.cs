@@ -48,7 +48,7 @@ public class PoolService
 
     public void ReturnToPool(IMapObject obj)
     {
-        var pool = obj.PersistentObject() ? _mapPool : _notPersistantPool;
+        var pool = obj.ObjType().Equals(MapObjectType.Creature) || obj.ObjType().Equals(MapObjectType.Interactive) ? _mapPool : _notPersistantPool;
 
         obj.SetActive(false);
 
@@ -75,7 +75,7 @@ public class PoolService
     {
         if (_cache.TryGetValue(id, out MapObject result))
         {
-            var pool = result.Persistent ? _mapPool : _notPersistantPool;
+            var pool = result.ObjType.Equals(MapObjectType.Creature) || result.ObjType.Equals(MapObjectType.Interactive) ? _mapPool : _notPersistantPool;
             
             if (Validate(pool, id))
             {

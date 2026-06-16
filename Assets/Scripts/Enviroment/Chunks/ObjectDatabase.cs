@@ -14,7 +14,7 @@ public class ObjectDatabase : ScriptableObject
         {
             var map = item.Prefab.GetComponent<IMapObject>();
             item.ID = map.Id();
-            item.Persistent = map.PersistentObject();
+            item.ObjType = map.ObjType();
         }
     }
 }
@@ -23,6 +23,6 @@ public class ObjectDatabase : ScriptableObject
 public class MapObject
 {
     public ushort ID;
-    public bool Persistent;
+    public MapObjectType ObjType;
     public GameObject Prefab;
 }

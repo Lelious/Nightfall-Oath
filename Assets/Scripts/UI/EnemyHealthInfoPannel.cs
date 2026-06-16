@@ -14,11 +14,13 @@ public class EnemyHealthInfoPannel : MonoBehaviour, IDisposable
     [SerializeField] private TextMeshProUGUI _health;
     [SerializeField] private Button _cancelButton;
     [SerializeField] private Transform _targetFramePrefab;
+    [SerializeField] private Material _targetFrameMaterial;
 
     private readonly CompositeDisposable _disposables = new();
     private Transform _frame;
     private InputService _inputService;
     private HealthComponent _healthComponent;
+    
 
     [Inject]
     public void Construct(InputService inputService)
@@ -48,6 +50,7 @@ public class EnemyHealthInfoPannel : MonoBehaviour, IDisposable
                 AddTo(_disposables);
 
             _cancelButton.gameObject.SetActive(!autoTarget);
+            _targetFrameMaterial.SetFloat("_Selected", autoTarget ? 0f : 1.0f);
 
             Observable.EveryUpdate().
                 TakeWhile(_ => enemy != null).

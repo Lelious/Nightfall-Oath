@@ -10,6 +10,7 @@ public class BootstrapInstaller : MonoInstaller
         BindTargetingService();
         BindSceneInitializer();
         BindEnemyFactory();
+        BindWorldGraphicStreamService();
     }
 
     private void BindPool()
@@ -56,5 +57,13 @@ public class BootstrapInstaller : MonoInstaller
         Container
             .Bind<InputService>()
             .AsSingle();
+    }
+
+    private void BindWorldGraphicStreamService()
+    {
+        Container
+            .BindInterfacesAndSelfTo<WorldGraphicStreamService>()
+            .AsSingle()
+            .NonLazy();
     }
 }

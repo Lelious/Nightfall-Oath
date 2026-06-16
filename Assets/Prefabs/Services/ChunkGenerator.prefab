@@ -44,23 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1474bf2ec62f2e1469d1eb06e4747501, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ChunkGenerator
-  _navMeshBuilder: {fileID: 0}
-  _hero: {fileID: 0}
-  _chunks:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
   _chunkSize: 100
-  _origin: {x: -1000, y: 0, z: -1000}
-  _startCoordinate: {x: 0, y: 0, z: 0}
   _tileResolution: 64
   _detailDist: 50
   _zOffset: 25
   _distanceToRebuild: 70
-  _dataBase: {fileID: 11400000, guid: 250e01acdfabe154cae64a7b586269b1, type: 2}
+  _cachedStaticData: []

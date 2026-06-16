@@ -15,18 +15,23 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 06e70636987fbc0469e7f9168653511f
   m_SerializeEntries:
-  - m_GUID: 1713a194995913c41ada2d1b083f4ce0
-    m_Address: LightSource
+  - m_GUID: 04ec532cd8c96cc46905d0aed8334f2a
+    m_Address: Assets/Models/Enviroment/Bridge_Base.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 250e01acdfabe154cae64a7b586269b1
-    m_Address: ObjectDatabase
+  - m_GUID: 07e462c63ae63c94f810428322040376
+    m_Address: Assets/Textures/UI/Interface/UIElements.spriteatlasv2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 2a48b9e7cd611a64bbed831bbcc4bd89
-    m_Address: ChunkNav_1_0
+  - m_GUID: 0d5ea65e91f99dc408598087bbde65ae
+    m_Address: Assets/Materials/Enviroment/Leaves.mat
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 109bb403c3e750446bb0a248fdbbffba
+    m_Address: Assets/Materials/Enviroment/Fern.mat
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -35,108 +40,93 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 34af683838a6ef542a6b46379aaaa73b
-    m_Address: Chunk_2_0
+  - m_GUID: 31321ba15b8f8eb4c954353edc038b1d
+    m_Address: Packages/com.unity.render-pipelines.universal/Runtime/Materials/Lit.mat
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 393a59e9e97ad5d45a385ada2fbcb58a
-    m_Address: Chunk_2_2
+  - m_GUID: 33b04e7b3ab500d47b260f137f5cc122
+    m_Address: Assets/Materials/Enviroment/Ground.mat
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3a033518fb1c48f4685ac0e4db365c92
-    m_Address: ChunkNav_2_2
+  - m_GUID: 39f72113bff4d4b4496058d5f429ff40
+    m_Address: StaticMeshes
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 3d12cf5c7c0e3434aba7fdbd03157ffa
-    m_Address: ChunkNav_2_1
+  - m_GUID: 46cd1e6195d6a6540823d26dfdc8ec6d
+    m_Address: Assets/Textures/Noise/5036-v3.jpg
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 439051caa8f82424fa32341e5cb33612
-    m_Address: ChunkNav_1_1
+  - m_GUID: 48a664db8cb534e4384381be7f89a1c4
+    m_Address: Assets/Textures/Matcap/3F4441_D1D7D6_888F87_A2ADA1-512px.png
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 46874b58207a88c49a26ec902d426ef3
-    m_Address: EnemyBase
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 48c1d890aeeddb44ba824277645eaf78
-    m_Address: Chunk_1_2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 49fb24dbc72756142a37618d5bbb0806
-    m_Address: CameraParent
+  - m_GUID: 4d283e9b14e7be94aa7090111a56eac8
+    m_Address: Assets/Models/Enviroment/Cliff.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 53e34860182b7d046a38c834a134f737
-    m_Address: Chunk_1_0
+    m_Address: Assets/Chunks/ChunkData/Chunk_1_0.bytes
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 57ca1ff77b1919f46aa76c5f58b74a40
-    m_Address: InterfaceUI
+  - m_GUID: 57f80ce547754754b9ded7d579a1c81e
+    m_Address: Assets/Models/Enviroment/Bridge_walk.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7a45e721c337bb7409ce4e8042bbd5d3
-    m_Address: ChunkNav_0_0
+  - m_GUID: 5bd1080421014864d8c2178d36cecbe4
+    m_Address: "Assets/Textures/Noise/\u0422\u0435\u043A\u0441\u0442\u0443\u0440\u0430.jpg"
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 7eb5011c8c613534f9747c2067127015
-    m_Address: ChunkGenerator
+  - m_GUID: 5d1462d351be9a74db76625b89ad05bb
+    m_Address: Assets/Textures/Matcap/525050_D4D3D3_959393_ACACAC-512px.png
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8ae4dc0296c31c94e95d5fd2faa2c838
-    m_Address: Chunk
+  - m_GUID: 62161956d1e3ea24eb24a8d70530bd87
+    m_Address: Assets/Models/Enviroment/Buildings/HouseCorner_1x1.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 90690a3081aed8f428941dd2be48caa0
-    m_Address: Chunk_1_1
+  - m_GUID: 6774d84f549ce454cb006c621164b296
+    m_Address: Assets/Shaders/SimpleLightShader 1.shader
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 92782ba61a7aaf744aa4fe848b354506
-    m_Address: Chunk_0_1
+  - m_GUID: 87f1b8b125a7551429fc312421483942
+    m_Address: Fog
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a1e62dd756cd93e48a8db41247b0b3fe
-    m_Address: ChunkNav_0_1
+  - m_GUID: 933532a4fcc9baf4fa0491de14d08ed7
+    m_Address: Packages/com.unity.render-pipelines.universal/Shaders/Lit.shader
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c01356c5bff2cc345a1929e7faaa4412
-    m_Address: PlayerHUD
+  - m_GUID: 9d16e4e723fa5d24ba06867852c46b9e
+    m_Address: Assets/Models/Enviroment/Tree_1.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: c0e9e439add44c240a50999e80a53d56
-    m_Address: Chunk_0_0
+  - m_GUID: baa2254f39c22cb4388efd38523ec778
+    m_Address: Assets/Materials/Enviroment/Bark.mat
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: d8fb62a0657580845b0ee62dc58919d7
-    m_Address: NavMeshBuilder
+  - m_GUID: e292589cd9da39a4590156213396227b
+    m_Address: Assets/Models/Enviroment/Fern_2.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: dc106c363ae49004ebb59312d628382c
-    m_Address: heightmap
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: e52c29cf40d70e240b8124bc36bebc42
-    m_Address: CharacterMale
+  - m_GUID: e55d0a0457a69354fa4941e979bebf4c
+    m_Address: Assets/Models/Enviroment/Fern_1.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -145,28 +135,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: ea310f2e7fa8abe4dbe6fe8ddbcf72e2
-    m_Address: Chunk_2_1
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f3d8250273c4a1e4c834ab8c4ddc0091
-    m_Address: Chunk_0_2
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f45dd9398f9f3ff4ba94d1dbf0b842f5
-    m_Address: CreatureDatabase
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: f8243bb353e5cb74481bb26fe62fd298
-    m_Address: Wolf
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: fd379613d3cff3e45af99cc6335c6d59
-    m_Address: ScreenTargetSelector
+  - m_GUID: f7f451a72e7fd0a438b6b0a54bbc6647
+    m_Address: Assets/Models/Enviroment/Fern_3.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

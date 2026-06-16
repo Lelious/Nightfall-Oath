@@ -3590,6 +3590,7 @@ MonoBehaviour:
   _health: {fileID: 7344084733404346837}
   _cancelButton: {fileID: 3234690848355549174}
   _targetFramePrefab: {fileID: 5624159323685027438, guid: 2a3e6638a0a563b438a884b6b12f8fa3, type: 3}
+  _targetFrameMaterial: {fileID: 2100000, guid: a0f5fca289e712a4c9f5203ee3b840b4, type: 2}
 --- !u!1 &7021812383138263629
 GameObject:
   m_ObjectHideFlags: 0
@@ -4129,6 +4130,7 @@ GameObject:
   - component: {fileID: 867024213839799154}
   - component: {fileID: 3671312176873534137}
   - component: {fileID: 8941213396157980725}
+  - component: {fileID: 1617890317354393395}
   m_Layer: 5
   m_Name: PlayerHUD
   m_TagString: Untagged
@@ -4266,6 +4268,21 @@ MonoBehaviour:
   _hpBar: {fileID: 687793044486063195}
   _mpBar: {fileID: 2668245488243538050}
   _expBar: {fileID: 0}
+--- !u!114 &1617890317354393395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8738196722572862379}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 58c6dfd936ea507488a98b033ed827ae, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FPSDisplay
+  _counter: {fileID: 7098181940349365968}
+  textUpdateInterval: 0.3
+  smoothing: 5
 --- !u!1001 &2482502231823647191
 PrefabInstance:
   m_ObjectHideFlags: 0

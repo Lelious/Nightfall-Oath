@@ -2,29 +2,57 @@ using System.Collections.Generic;
 
 public class RuntimeChunkData
 {
-    public List<RuntimeChunkObject> RuntimeObjects;
+    public List<RuntimeCreatureState> RuntimeDynamicObjects;
+    public List<RuntimeInteractiveState> RuntimeInteractiveObjects;
 
-    public RuntimeChunkData(List<MapCreatureInfo> dynamicInfo)
+    public RuntimeChunkData(List<MapCreatureInfo> dynamicInfo, List<MapObjectInfo> interactiveInfo)
     {
-        RuntimeObjects = new();
+        RuntimeDynamicObjects = new();
+        RuntimeInteractiveObjects = new();
 
         foreach (var item in dynamicInfo)
         {
-            RuntimeObjects.Add(new RuntimeChunkObject(item));
+            RuntimeDynamicObjects.Add(new RuntimeCreatureState(item));
+        }
+
+        foreach (var item2 in interactiveInfo)
+        {
+            RuntimeInteractiveObjects.Add(new RuntimeInteractiveState(item2));
         }
     }
 }
 
-public class RuntimeChunkObject
+public abstract class RuntimeChunkObject
 {
-    public MapCreatureInfo DynamicObject;
+    public MapObjectInfo TargetObject { get; protected set; }
+
+    protected RuntimeChunkObject(MapObjectInfo info)
+    {
+        TargetObject = info;
+    }
+}
+
+public class RuntimeCreatureState : RuntimeChunkObject
+{
     public bool Alive;
     public float ActiveHealth;
-    public float RessurectedTime; //Experimental
+    public float RessurectedTime;
 
-    public RuntimeChunkObject(MapCreatureInfo info)
+    public MapCreatureInfo CreatureInfo => (MapCreatureInfo)TargetObject;
+
+    public RuntimeCreatureState(MapCreatureInfo info) : base(info)
     {
-        DynamicObject = info;
         Alive = true;
+    }
+}
+
+public class RuntimeInteractiveState : RuntimeChunkObject
+{
+    public byte State;
+    public float LastActivationTime;
+
+    public RuntimeInteractiveState(MapObjectInfo info) : base(info)
+    {
+        State = 0;
     }
 }

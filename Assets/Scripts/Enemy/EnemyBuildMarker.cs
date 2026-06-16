@@ -9,7 +9,6 @@ public class EnemyBuildMarker : MonoBehaviour, IMapCreature
     public CreatureDatabase DataBase;
 
     public ushort ID;
-    public bool Persistent = true;
 
     public bool Active()
     {
@@ -33,7 +32,7 @@ public class EnemyBuildMarker : MonoBehaviour, IMapCreature
         throw new System.NotImplementedException();
     }
 
-    public bool PersistentObject() => Persistent;
+
     public Vector3 Position() => transform.position;
     public Quaternion Rotation() => transform.rotation;
     public Vector3 Scale() => transform.localScale;
@@ -75,5 +74,13 @@ public class EnemyBuildMarker : MonoBehaviour, IMapCreature
             UnityEditor.EditorUtility.SetDirty(gameObject);
         }
     }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawCube(transform.position, Vector3.one);
+    }
 #endif
+
+    public MapObjectType ObjType() => MapObjectType.Creature;
 }

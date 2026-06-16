@@ -10,6 +10,7 @@ public class CharacterAttack : AttackComponent
     [SerializeField] private Character _character;  
 
     private readonly CompositeDisposable _disposables = new();
+    private DamageProcessService _damageService;
     private TargetingService _targetingService;    
     private InputService _inputService;
     private Enemy _targetToChase;
@@ -23,10 +24,11 @@ public class CharacterAttack : AttackComponent
     }
 
     [Inject]
-    public void Construct(TargetingService targetingService, InputService inputService)
+    public void Construct(TargetingService targetingService, InputService inputService, DamageProcessService damageService)
     {
         _targetingService = targetingService;
         _inputService = inputService;
+        _damageService = damageService;
 
         Observable.EveryUpdate()
             .Where(_ => _inputService.ActionSpellId.Value > 0)
@@ -41,13 +43,16 @@ public class CharacterAttack : AttackComponent
     {
         if (_character.GetCurrentWeaponType().Equals(EquippedWeaponType.Bow))
         {
-            var arrow = Instantiate(_arrowPrefab, _arrowShootPoint.position, transform.rotation);
+            var arrow = Instantiate(_arrowPrefab, _arrowShootPoint.position, transform.rotation).GetComponent<Arrow>();
+            arrow.InitializeArrow(_damageService);
         }
         else
         {
-            if(_targetToAttack != null && _targetToAttack.GetHealth().IsAlive())
+            if (_targetToAttack != null)
             {
-                _targetToAttack.GetHealth().TakeDamage(20f);
+                var crit = Random.Range(0, 2);
+                var damage = crit > 0 ? 40f : 20f;
+                _damageService.ProcessDamage(_targetToAttack.GetHealth(), damage, crit > 0 ? DamageSource.Critical : DamageSource.Creature);
             }
         }
     }

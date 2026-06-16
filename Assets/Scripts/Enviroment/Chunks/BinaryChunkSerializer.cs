@@ -6,7 +6,6 @@ public static class BinaryChunkSerializer
 {
     private const float Range = 1000f;
     private const float ScaleMax = 300f;
-    private const ushort ENEMY_BASE_ID = 20;
 
     public static byte[] Serialize(IMapObject[] objects)
     {
@@ -21,9 +20,12 @@ public static class BinaryChunkSerializer
                 WriteVector3Ushort(writer, obj.Position(), Range, false);
                 WriteRotationEuler(writer, obj.Rotation());
                 WriteVector3Ushort(writer, obj.Scale(), ScaleMax, false);
+                WriteType(writer, obj.ObjType());
+              
 
-                if (obj is IMapCreature creature)
+                if (obj.ObjType().Equals(MapObjectType.Creature))
                 {
+                    var creature = (IMapCreature)obj;
                     var (type, level, elite) = creature.GetCreatureTypeAndLvl();
                     writer.Write(type);
                     writer.Write(level);
@@ -47,18 +49,20 @@ public static class BinaryChunkSerializer
                 Vector3 pos = ReadVector3Ushort(reader, Range, false);
                 Quaternion rot = ReadRotationEuler(reader);
                 Vector3 scale = ReadVector3Ushort(reader, ScaleMax, false);
+                MapObjectType type = ReadType(reader);
 
-                if (id == ENEMY_BASE_ID)
+
+                if (type.Equals(MapObjectType.Creature))
                 {
                     byte creatureType = reader.ReadByte();
                     ushort level = reader.ReadUInt16();
                     bool elite = reader.ReadBoolean();
 
-                    list.Add(new MapCreatureInfo(id, pos, rot, scale, creatureType, level, elite));
+                    list.Add(new MapCreatureInfo(id, pos, rot, scale, type, creatureType, level, elite));
                 }
                 else
                 {
-                    list.Add(new MapObjectInfo(id, pos, rot, scale));
+                    list.Add(new MapObjectInfo(id, pos, rot, scale, type));
                 }
             }
         }
@@ -109,5 +113,15 @@ public static class BinaryChunkSerializer
         float z = (r.ReadUInt16() / 65535f) * 360f;
 
         return Quaternion.Euler(x, y, z);
+    }
+
+    private static MapObjectType ReadType(BinaryReader r)
+    {
+        return (MapObjectType)r.ReadByte();
+    }
+
+    private static void WriteType(BinaryWriter w, MapObjectType type)
+    {
+        w.Write((byte)type);
     }
 }
