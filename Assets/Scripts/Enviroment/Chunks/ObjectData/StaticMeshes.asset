@@ -13,10 +13,22 @@ MonoBehaviour:
   m_Name: StaticMeshes
   m_EditorClassIdentifier: Assembly-CSharp::MeshMaterialConfig
   allMeshes:
-  - Name: Tree
-    Id: 3
+  - Name: Tree_1
+    Id: 0
     meshReference:
       m_AssetGUID: 9d16e4e723fa5d24ba06867852c46b9e
+      m_SubObjectName: Cylinder.015
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: baa2254f39c22cb4388efd38523ec778, type: 2}
+    - {fileID: 2100000, guid: 0d5ea65e91f99dc408598087bbde65ae, type: 2}
+  - Name: Tree_2
+    Id: 1
+    meshReference:
+      m_AssetGUID: 515f2c40b1c80fe43b71d068ec751b1c
       m_SubObjectName: Cylinder.014
       m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
         Culture=neutral, PublicKeyToken=null
@@ -25,17 +37,29 @@ MonoBehaviour:
     SubMeshMaterials:
     - {fileID: 2100000, guid: baa2254f39c22cb4388efd38523ec778, type: 2}
     - {fileID: 2100000, guid: 0d5ea65e91f99dc408598087bbde65ae, type: 2}
-  - Name: Cliff
-    Id: 14
+  - Name: Tree_3
+    Id: 2
     meshReference:
-      m_AssetGUID: 4d283e9b14e7be94aa7090111a56eac8
-      m_SubObjectName: Plane.245
+      m_AssetGUID: ccf74d7011f67754c8ad06e7b901529b
+      m_SubObjectName: Cylinder.043
       m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
         Culture=neutral, PublicKeyToken=null
       m_SubObjectGUID: 
       m_EditorAssetChanged: 0
     SubMeshMaterials:
-    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+    - {fileID: 2100000, guid: 0d5ea65e91f99dc408598087bbde65ae, type: 2}
+    - {fileID: 2100000, guid: baa2254f39c22cb4388efd38523ec778, type: 2}
+  - Name: HouseStair
+    Id: 3
+    meshReference:
+      m_AssetGUID: 49704aa7de152e64b8e36a263b838358
+      m_SubObjectName: Plane.209
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
   - Name: Fern_1
     Id: 4
     meshReference:
@@ -69,11 +93,155 @@ MonoBehaviour:
       m_EditorAssetChanged: 0
     SubMeshMaterials:
     - {fileID: 2100000, guid: 109bb403c3e750446bb0a248fdbbffba, type: 2}
-  - Name: BridgeBase
-    Id: 29
+  - Name: Cliff
+    Id: 7
     meshReference:
-      m_AssetGUID: 04ec532cd8c96cc46905d0aed8334f2a
-      m_SubObjectName: Cube.032
+      m_AssetGUID: 4d283e9b14e7be94aa7090111a56eac8
+      m_SubObjectName: Plane.245
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: HouseWall_Back_1x2
+    Id: 8
+    meshReference:
+      m_AssetGUID: 028adbf040eb88c459174e73b3176529
+      m_SubObjectName: Plane.253
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
+  - Name: HouseWall_Back_2x2
+    Id: 9
+    meshReference:
+      m_AssetGUID: 0ea77c835e41e3d4fb9fa3da878ef141
+      m_SubObjectName: Plane.254
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
+  - Name: CastleTowerWallAngle
+    Id: 10
+    meshReference:
+      m_AssetGUID: c8b83f15554bc1f41aae471c7685bc0d
+      m_SubObjectName: Cylinder.026
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: HouseBasement_1x2
+    Id: 11
+    meshReference:
+      m_AssetGUID: 3df41ad5d44a75b4da3413834e63f237
+      m_SubObjectName: Plane.251
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: HouseBasement_2x2
+    Id: 12
+    meshReference:
+      m_AssetGUID: 8a26d4815e257e141a141a167e211b73
+      m_SubObjectName: Plane.250
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: HouseFloor_2x2
+    Id: 13
+    meshReference:
+      m_AssetGUID: b0279b30c222e9848a84a3da2cb3f7ca
+      m_SubObjectName: Plane.256
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
+  - Name: HouseFloor_1x1
+    Id: 14
+    meshReference:
+      m_AssetGUID: c037e340e074f944ea2645f6454f4741
+      m_SubObjectName: Plane.255
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
+  - Name: WoodBoard
+    Id: 20
+    meshReference:
+      m_AssetGUID: b80deca299009704f9dccb9868acf0c6
+      m_SubObjectName: Plane.077
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: CastleTowerWallAngleCutted
+    Id: 21
+    meshReference:
+      m_AssetGUID: f221b31f4fe89a947a0d502ffc8796ae
+      m_SubObjectName: Cylinder.016
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: StoneColumn
+    Id: 22
+    meshReference:
+      m_AssetGUID: 5a18eeb38b236ac41b3dbb3b001d419d
+      m_SubObjectName: CastleTower.017
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: CastleTowerWoodFloor
+    Id: 23
+    meshReference:
+      m_AssetGUID: 1d7d863f05f8d514fb38d2ff8a2415f7
+      m_SubObjectName: CastleTower.018
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
+  - Name: CastleTowerTop
+    Id: 24
+    meshReference:
+      m_AssetGUID: ded33099bffc1a747bdb481dfa1543c4
+      m_SubObjectName: Cylinder.018
+      m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
+        Culture=neutral, PublicKeyToken=null
+      m_SubObjectGUID: 
+      m_EditorAssetChanged: 0
+    SubMeshMaterials:
+    - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}
+  - Name: RoundArk
+    Id: 25
+    meshReference:
+      m_AssetGUID: 2467e5dcd146f654090df05487d54e00
+      m_SubObjectName: CastleTower.014
       m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
         Culture=neutral, PublicKeyToken=null
       m_SubObjectGUID: 
@@ -91,15 +259,14 @@ MonoBehaviour:
       m_EditorAssetChanged: 0
     SubMeshMaterials:
     - {fileID: 2100000, guid: 33b04e7b3ab500d47b260f137f5cc122, type: 2}
-  - Name: HouseCorner_1x1
-    Id: 30
+  - Name: BridgeBase
+    Id: 29
     meshReference:
-      m_AssetGUID: 62161956d1e3ea24eb24a8d70530bd87
-      m_SubObjectName: Plane.094
+      m_AssetGUID: 04ec532cd8c96cc46905d0aed8334f2a
+      m_SubObjectName: Cube.032
       m_SubObjectType: UnityEngine.Mesh, UnityEngine.CoreModule, Version=0.0.0.0,
         Culture=neutral, PublicKeyToken=null
       m_SubObjectGUID: 
       m_EditorAssetChanged: 0
     SubMeshMaterials:
-    - {fileID: 2100000, guid: eb0f7925ee4e195428b3e26ebcf3f8cd, type: 2}
     - {fileID: 2100000, guid: eb0f7b6848cbf4840846a531c112d1a9, type: 2}

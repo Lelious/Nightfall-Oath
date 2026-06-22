@@ -102,6 +102,8 @@ public class MeshCopier : MonoBehaviour
     [ContextMenu("BakeChunkObjects")]
     public void BakeChunkObjects()
     {
+        Vector3 startChunkPos = new Vector3(-950f, 0f, -950f);
+
         var mapEnviroment = FindObjectsByType<MapEnviromentObject>(
             FindObjectsInactive.Include,
             FindObjectsSortMode.None
@@ -113,8 +115,10 @@ public class MeshCopier : MonoBehaviour
         var chunkMap = new Dictionary<Vector2Int, List<IMapObject>>();
         if (!Directory.Exists(_saveChunkDataPath))
             Directory.CreateDirectory(_saveChunkDataPath);
+
         foreach (var obj in mapEnviroment)
         {
+            if (obj.ExcludeFromBake) continue;
             if (obj is IMapObject mapObj)
             {
                 Vector3 pos = mapObj.Position() - _startPos;
@@ -155,7 +159,10 @@ public class MeshCopier : MonoBehaviour
 
                 if (chunkMap.TryGetValue(currentCoord, out var objectsInChunk))
                 {
-                    byte[] data = BinaryChunkSerializer.Serialize(objectsInChunk.ToArray());
+                    float chunkCenterX = startChunkPos.x + (x * 100f);
+                    float chunkCenterZ = startChunkPos.z + (z * 100f);
+                    Vector3 chunkCenter = new Vector3(chunkCenterX, 0f, chunkCenterZ);
+                    byte[] data = BinaryChunkSerializer.Serialize(objectsInChunk.ToArray(), chunkCenter);
 
                     string path = Path.Combine(_saveChunkDataPath, $"Chunk_{x}_{z}.bytes");
                     File.WriteAllBytes(path, data);

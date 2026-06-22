@@ -42,7 +42,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1158215933970571388}
-  m_Mesh: {fileID: 8691780276856062721, guid: 9d16e4e723fa5d24ba06867852c46b9e, type: 3}
+  m_Mesh: {fileID: 6240159341419647114, guid: 9d16e4e723fa5d24ba06867852c46b9e, type: 3}
 --- !u!23 &6343206596815000870
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -131,4 +131,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapEnviromentObject
   ID: 3
-  _persistentObject: 1
+  Type: 0

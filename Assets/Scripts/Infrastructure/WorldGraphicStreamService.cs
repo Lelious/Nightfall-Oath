@@ -1,6 +1,9 @@
 ﻿using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using Unity.Collections;
+using Unity.Jobs;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.Rendering;
@@ -8,6 +11,7 @@ using Zenject;
 
 public class WorldGraphicStreamService : IInitializable, IDisposable
 {
+    private Matrix4x4[] _culledRenderBuffer = new Matrix4x4[INSTANCE_BUFFER_MAX_SIZE];
     private Dictionary<ushort, Dictionary<int, InstanceBuffer>> _masterRenderQueue;
     private Dictionary<ushort, MeshData> _configIdCache;
     private Dictionary<Mesh, Material[]> _meshMaterialCache;
@@ -17,6 +21,8 @@ public class WorldGraphicStreamService : IInitializable, IDisposable
     private MeshMaterialConfig _meshConfig;
     private bool _isConfigLoaded;
     private const int INSTANCE_BUFFER_MAX_SIZE = 200;
+    private Camera _mainCamera;
+    private const float _captureRadius = 25.0f;
 
     public void Initialize()
     {
@@ -24,8 +30,7 @@ public class WorldGraphicStreamService : IInitializable, IDisposable
         _meshMaterialCache = new Dictionary<Mesh, Material[]>();
         _loadedMeshes = new Dictionary<ushort, Mesh>();
         _meshRefCount = new Dictionary<ushort, int>();
-        _meshesInLoadingProgress = new();
-
+        _meshesInLoadingProgress = new();       
         RenderPipelineManager.beginCameraRendering += OnBeginCameraRendering;
         LoadConfigAsync().Forget();
     }
@@ -35,7 +40,7 @@ public class WorldGraphicStreamService : IInitializable, IDisposable
         if (camera.cameraType == CameraType.Preview || camera.cameraType == CameraType.Reflection) return;
         if (!_isConfigLoaded) return;
 
-        RenderQueues();    
+        RenderQueues();
     }
 
     public void RegisterObject(ushort meshID, Vector3 pos, Quaternion rot, Vector3 scale)
@@ -174,8 +179,16 @@ public class WorldGraphicStreamService : IInitializable, IDisposable
         }
     }
 
-    private void RenderQueues() 
+    private void RenderQueues()
     {
+        if (_mainCamera == null)
+            _mainCamera = Camera.main;
+
+        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(_mainCamera);
+        NativeArray<Plane> nativePlanes = new NativeArray<Plane>(planes, Allocator.TempJob);
+        Bounds infiniteWorldBounds = new Bounds(_mainCamera.transform.position, new Vector3(2000f, 500f, 2000f));
+        float3 camPos = _mainCamera.transform.position;
+
         foreach (var queueEntry in _masterRenderQueue)
         {
             ushort meshID = queueEntry.Key;
@@ -184,11 +197,12 @@ public class WorldGraphicStreamService : IInitializable, IDisposable
             if (!_loadedMeshes.TryGetValue(meshID, out Mesh currentMesh)) continue;
             if (!_meshMaterialCache.TryGetValue(currentMesh, out Material[] materials) || materials == null) continue;
 
+            Vector3 boundsSize = currentMesh.bounds.size;
+
             foreach (var subMeshEntry in subMeshes)
             {
                 int subMeshIndex = subMeshEntry.Key;
                 InstanceBuffer buffer = subMeshEntry.Value;
-
                 int count = buffer.Count;
                 if (count == 0) continue;
                 if (subMeshIndex >= currentMesh.subMeshCount) continue;
@@ -196,20 +210,51 @@ public class WorldGraphicStreamService : IInitializable, IDisposable
                 Material targetMaterial = materials[subMeshIndex];
                 if (targetMaterial == null) continue;
 
-                RenderParams rp = new RenderParams(targetMaterial);
-                rp.shadowCastingMode = ShadowCastingMode.On;
-                rp.receiveShadows = true;
-                rp.lightProbeUsage = LightProbeUsage.BlendProbes;
+                NativeArray<Matrix4x4> sourceNative = new NativeArray<Matrix4x4>(buffer.Matrices, Allocator.TempJob);
+                NativeQueue<Matrix4x4> visibleQueue = new NativeQueue<Matrix4x4>(Allocator.TempJob);
 
-                Graphics.RenderMeshInstanced(
-                    rparams: rp,
-                    mesh: currentMesh,
-                    submeshIndex: subMeshIndex,
-                    instanceData: buffer.Matrices,
-                    instanceCount: count
-                );
+                FrustumCullingJob cullingJob = new FrustumCullingJob
+                {
+                    SourceMatrices = sourceNative,
+                    FrustumPlanes = nativePlanes,
+                    BoundsSize = boundsSize,
+                    CameraPosition = camPos,
+                    CaptureRadiusSqr = _captureRadius * _captureRadius,
+                    VisibleMatricesQueue = visibleQueue.AsParallelWriter()
+                };
+
+                JobHandle handle = cullingJob.Schedule(count, 64);
+
+                handle.Complete();
+
+                int culledCount = visibleQueue.Count;
+                if (culledCount > 0)
+                {
+                    for (int i = 0; i < culledCount; i++)
+                    {
+                        _culledRenderBuffer[i] = visibleQueue.Dequeue();
+                    }
+
+                    RenderParams rp = new RenderParams(targetMaterial);
+                    rp.shadowCastingMode = ShadowCastingMode.On;
+                    rp.receiveShadows = true;
+                    rp.lightProbeUsage = LightProbeUsage.BlendProbes;
+                    rp.worldBounds = infiniteWorldBounds;
+
+                    Graphics.RenderMeshInstanced(
+                        rparams: rp,
+                        mesh: currentMesh,
+                        submeshIndex: subMeshIndex,
+                        instanceData: _culledRenderBuffer,
+                        instanceCount: culledCount
+                    );
+                }
+
+                sourceNative.Dispose();
+                visibleQueue.Dispose();
             }
         }
+        nativePlanes.Dispose();
     }
 
     private async UniTask LoadMeshIfNeeded(ushort meshID)
@@ -225,7 +270,7 @@ public class WorldGraphicStreamService : IInitializable, IDisposable
         Mesh loadedMesh = await meshData.meshReference.LoadAssetAsync().ToUniTask();
 
         Bounds realBounds = loadedMesh.bounds;
-        loadedMesh.bounds = new Bounds(realBounds.center, realBounds.size * 3f);
+        loadedMesh.bounds = new Bounds(realBounds.center, realBounds.size * 2f);
 
         _meshMaterialCache[loadedMesh] = meshData.SubMeshMaterials;
         _loadedMeshes[meshID] = loadedMesh;

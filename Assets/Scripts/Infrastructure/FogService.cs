@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[ExecuteAlways]
 public class FogService : MonoBehaviour
 {
     [Header("Настройки обычной зоны")]

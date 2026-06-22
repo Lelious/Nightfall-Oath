@@ -15,23 +15,48 @@ MonoBehaviour:
   m_GroupName: Default Local Group
   m_GUID: 06e70636987fbc0469e7f9168653511f
   m_SerializeEntries:
+  - m_GUID: 028adbf040eb88c459174e73b3176529
+    m_Address: Assets/Models/Enviroment/Buildings/HouseWallBack_1x2.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 04ec532cd8c96cc46905d0aed8334f2a
-    m_Address: Assets/Models/Enviroment/Bridge_Base.fbx
+    m_Address: Bridge_Base
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 07e462c63ae63c94f810428322040376
-    m_Address: Assets/Textures/UI/Interface/UIElements.spriteatlasv2
+    m_Address: UIElements
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0c2316534f3b3144a9e60b4422a27d0c
+    m_Address: StoneTowerStair
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 0d5ea65e91f99dc408598087bbde65ae
-    m_Address: Assets/Materials/Enviroment/Leaves.mat
+    m_Address: Leaves
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 0ea77c835e41e3d4fb9fa3da878ef141
+    m_Address: Assets/Models/Enviroment/Buildings/HouseWallBack_2x2.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 109bb403c3e750446bb0a248fdbbffba
-    m_Address: Assets/Materials/Enviroment/Fern.mat
+    m_Address: Fern
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 1d7d863f05f8d514fb38d2ff8a2415f7
+    m_Address: StoneTowerWoodFloor
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 2467e5dcd146f654090df05487d54e00
+    m_Address: Assets/Models/Enviroment/Buildings/CastleArkRound.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -41,12 +66,12 @@ MonoBehaviour:
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 31321ba15b8f8eb4c954353edc038b1d
-    m_Address: Packages/com.unity.render-pipelines.universal/Runtime/Materials/Lit.mat
+    m_Address: Lit
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 33b04e7b3ab500d47b260f137f5cc122
-    m_Address: Assets/Materials/Enviroment/Ground.mat
+    m_Address: Ground
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -55,48 +80,73 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 3df41ad5d44a75b4da3413834e63f237
+    m_Address: HouseBasement_1x2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 46cd1e6195d6a6540823d26dfdc8ec6d
-    m_Address: Assets/Textures/Noise/5036-v3.jpg
+    m_Address: 5036-v3
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 48a664db8cb534e4384381be7f89a1c4
-    m_Address: Assets/Textures/Matcap/3F4441_D1D7D6_888F87_A2ADA1-512px.png
+    m_Address: 3F4441_D1D7D6_888F87_A2ADA1-512px
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 48f2b9cbe4804a74fb49db9cc77035bd
+    m_Address: StoneWall_2x1_v2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 49704aa7de152e64b8e36a263b838358
+    m_Address: HouseStair
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 4ceb89e249b75aa4fb14c35d1bad5b5a
+    m_Address: Assets/Models/Enviroment/Buildings/CastleWall_half_v1.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 4d283e9b14e7be94aa7090111a56eac8
-    m_Address: Assets/Models/Enviroment/Cliff.fbx
+    m_Address: Cliff
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 515f2c40b1c80fe43b71d068ec751b1c
+    m_Address: Tree_2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 53e34860182b7d046a38c834a134f737
-    m_Address: Assets/Chunks/ChunkData/Chunk_1_0.bytes
+    m_Address: Chunk_1_0
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 57f80ce547754754b9ded7d579a1c81e
-    m_Address: Assets/Models/Enviroment/Bridge_walk.fbx
+    m_Address: Bridge_walk
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 5a18eeb38b236ac41b3dbb3b001d419d
+    m_Address: StoneTowerMiddleColumn
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5bd1080421014864d8c2178d36cecbe4
-    m_Address: "Assets/Textures/Noise/\u0422\u0435\u043A\u0441\u0442\u0443\u0440\u0430.jpg"
+    m_Address: "\u0422\u0435\u043A\u0441\u0442\u0443\u0440\u0430"
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 5d1462d351be9a74db76625b89ad05bb
-    m_Address: Assets/Textures/Matcap/525050_D4D3D3_959393_ACACAC-512px.png
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 62161956d1e3ea24eb24a8d70530bd87
-    m_Address: Assets/Models/Enviroment/Buildings/HouseCorner_1x1.fbx
+    m_Address: 525050_D4D3D3_959393_ACACAC-512px
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 6774d84f549ce454cb006c621164b296
-    m_Address: Assets/Shaders/SimpleLightShader 1.shader
+    m_Address: SimpleLightShader 1
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -105,28 +155,88 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 8a26d4815e257e141a141a167e211b73
+    m_Address: HouseBasement_2x2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 933532a4fcc9baf4fa0491de14d08ed7
-    m_Address: Packages/com.unity.render-pipelines.universal/Shaders/Lit.shader
+    m_Address: Lit
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 94020b2eaddf5104b9b8989a07789a35
+    m_Address: Assets/Models/Enviroment/Buildings/CastleWall_half_v2.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 9d16e4e723fa5d24ba06867852c46b9e
-    m_Address: Assets/Models/Enviroment/Tree_1.fbx
+    m_Address: Tree_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9ff56fefe84c1d44cb4748e8552ed6ca
+    m_Address: StoneWall_2x1_v1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b0279b30c222e9848a84a3da2cb3f7ca
+    m_Address: HouseFloor_2x2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: b80deca299009704f9dccb9868acf0c6
+    m_Address: WoodBoard
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: baa2254f39c22cb4388efd38523ec778
-    m_Address: Assets/Materials/Enviroment/Bark.mat
+    m_Address: Bark
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c037e340e074f944ea2645f6454f4741
+    m_Address: HouseFloor_1x1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: c8b83f15554bc1f41aae471c7685bc0d
+    m_Address: Assets/Models/Enviroment/Buildings/StoneTowerAngleWall.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: cc33b0b0113ad8c46ac31a031903a568
+    m_Address: StoneWallTop
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ccf74d7011f67754c8ad06e7b901529b
+    m_Address: Tree_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: ded33099bffc1a747bdb481dfa1543c4
+    m_Address: Assets/Models/Enviroment/Buildings/StoneTowerAngleTop.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e292589cd9da39a4590156213396227b
-    m_Address: Assets/Models/Enviroment/Fern_2.fbx
+    m_Address: Fern_2
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e42b521132ac77243b893f3a12181476
+    m_Address: StoneWall_2x2
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: e55d0a0457a69354fa4941e979bebf4c
-    m_Address: Assets/Models/Enviroment/Fern_1.fbx
+    m_Address: Fern_1
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: e6aec688153ba4a4b883125b11355548
+    m_Address: Assets/Models/Enviroment/Buildings/CastleWall.fbx
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -135,8 +245,18 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f221b31f4fe89a947a0d502ffc8796ae
+    m_Address: Assets/Models/Enviroment/Buildings/StoneTowerAngleWallCutted.fbx
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: f7f451a72e7fd0a438b6b0a54bbc6647
-    m_Address: Assets/Models/Enviroment/Fern_3.fbx
+    m_Address: Fern_3
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: fe393ace9b354375a9cb14cdbbc28be4
+    m_Address: Assets/UnityTechnologies/ParticlePack/TextMesh Pro/Shaders/TMP_SDF-Mobile.shader
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

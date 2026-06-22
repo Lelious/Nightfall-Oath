@@ -38,7 +38,7 @@ public class ChunkGenerator : MonoBehaviour, IDisposable
     private List<Chunk> _chunks = new();
     private HashSet<Chunk> _dirtyChunks;
     private EnemyFactory _enemyFactory;
-    private Vector2 _lastRebuildedPos;
+    private float2 _lastRebuildedPos;
     private PoolService _poolService;
     private Transform _worldParent;
     private float _distPervertex;
@@ -67,7 +67,7 @@ public class ChunkGenerator : MonoBehaviour, IDisposable
 
             if (_inited && !_chunksRebuild)
             {
-                var heroPos = new Vector2(_hero.transform.position.x, _hero.transform.position.z);
+                var heroPos = new float2(_hero.transform.position.x, _hero.transform.position.z);
                 if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, _lastRebuildedPos, _distanceToRebuild))
                 {
                     var centerChunk = GetChunkCoord(_hero.transform.position);
@@ -267,7 +267,7 @@ public class ChunkGenerator : MonoBehaviour, IDisposable
         while (true)
         {
             _objToRemove.Clear();
-            Vector2 heroPos = new Vector2(_hero.transform.position.x, _hero.transform.position.z + _zOffset);
+            float2 heroPos = new float2(_hero.transform.position.x, _hero.transform.position.z + _zOffset);
 
             foreach (var item in _chunks)
             {
@@ -281,7 +281,7 @@ public class ChunkGenerator : MonoBehaviour, IDisposable
                         switch (item2.Type)
                         {
                             case MapObjectType.StaticDecoration:
-                                if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, new Vector2(itemPos.x, itemPos.z), _detailDist))
+                                if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, new float2(itemPos.x, itemPos.z), _detailDist))
                                 {
                                     if(item2.Initialized)
                                     {
@@ -300,7 +300,7 @@ public class ChunkGenerator : MonoBehaviour, IDisposable
                                 break;
 
                             case MapObjectType.Interactive:
-                                if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, new Vector2(itemPos.x, itemPos.z), _detailDist))
+                                if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, new float2(itemPos.x, itemPos.z), _detailDist))
                                 {
                                     if (item2.MapObject != null)
                                     {
@@ -365,7 +365,7 @@ public class ChunkGenerator : MonoBehaviour, IDisposable
                             }
                         }
 
-                        if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, new Vector2(enemyPos.x, enemyPos.z), _detailDist))
+                        if (LeliousMathematic.FlatDistanceGreaterThan(heroPos, new float2(enemyPos.x, enemyPos.z), _detailDist))
                         {
                             if (creatureInfo.MapObject != null)
                             {
@@ -465,7 +465,7 @@ public class ChunkGenerator : MonoBehaviour, IDisposable
             }
 
             var bytes = handle.Result.bytes;
-            var allData = BinaryChunkSerializer.Deserialize(bytes);
+            var allData = BinaryChunkSerializer.Deserialize(bytes, chunk.transform.position);
 
             _cachedStaticData.Clear();
             _cachedDynamicData.Clear();

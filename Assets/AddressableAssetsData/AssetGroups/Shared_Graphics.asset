@@ -20,16 +20,6 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 14c5e7e3a70b67645888bc1363c9e98c
-    m_Address: JimNightshade-Regular SDF - DamageNormal
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 16c35b4e9ba6bfe4d9e7e01415a77647
-    m_Address: JimNightshade-DamageCritical
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 36e335017ad71d54fbb10842863188ae
     m_Address: FallbackShader
     m_ReadOnly: 0
@@ -40,23 +30,8 @@ MonoBehaviour:
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 452ea7ffde5265f47b3cde613e69e805
-    m_Address: JimNightshade-DamagePlayer
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 4a797c67d1771ff4994d697c8fdc1681
-    m_Address: JimNightshade-Healing
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 776677ab3818fb249adaca05f4e04545
     m_Address: Embers
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 8c25b0055f4dc3f4694061603bc7f879
-    m_Address: JimNightshade-Regular SDF
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0
@@ -67,26 +42,6 @@ MonoBehaviour:
     FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 8f586378b4e144a9851e7b34d9b748ee
     m_Address: LiberationSans SDF
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: 984952fed85cb7f49a35e2c74fffb58b
-    m_Address: JimNightshade-Regular SDF - Healing
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: a5095453ca4a89245a6f51ab1986cc0e
-    m_Address: JimNightshade-Regular SDF - DamagePlayer
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bc1a011bd2c39f5408c3f388c64ebc32
-    m_Address: JimNightshade-DamageNormal
-    m_ReadOnly: 0
-    m_SerializedLabels: []
-    FlaggedDuringContentUpdateRestriction: 0
-  - m_GUID: bd40196447f0f044da576afa5c8233b7
-    m_Address: JimNightshade-Regular SDF - DamageCritical
     m_ReadOnly: 0
     m_SerializedLabels: []
     FlaggedDuringContentUpdateRestriction: 0

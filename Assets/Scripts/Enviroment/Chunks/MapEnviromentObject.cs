@@ -2,9 +2,9 @@ using UnityEngine;
 
 public class MapEnviromentObject : MonoBehaviour, IMapObject
 {
+    public bool ExcludeFromBake;
     [SerializeField] private ushort ID;
     [SerializeField] private MapObjectType Type;
-    private bool _initialized;
 
     public bool Active() => gameObject.activeInHierarchy;
     public ushort Id() => ID;

@@ -130,12 +130,13 @@ Material:
     - _ClearCoatSmoothness: 0
     - _ConeAngle: 1
     - _Cull: 2
-    - _Cutoff: 0.5
+    - _Cutoff: 0
     - _CylinderRad: 26.2
     - _DetailAlbedoMapScale: 1
     - _DetailNormalMapScale: 1
     - _DissolveEdge: 0
     - _DissolveRadius: 0
+    - _DitherIntensity: 0.2
     - _DstBlend: 0
     - _DstBlendAlpha: 0
     - _EdgeIntensity: 0

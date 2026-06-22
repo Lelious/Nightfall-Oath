@@ -5,7 +5,6 @@ using UnityEngine.UI;
 
 public class UIItemInventorySlot : MonoBehaviour, IBeginDragHandler, IEndDragHandler, IDragHandler, IPointerClickHandler
 {
-    [SerializeField] private Canvas _canvas;
     [SerializeField] private RectTransform _dragParent;
     [SerializeField] private DraggedItem _itemDragPrefab;
     [SerializeField] private Image _itemImage;
@@ -18,14 +17,17 @@ public class UIItemInventorySlot : MonoBehaviour, IBeginDragHandler, IEndDragHan
     private Item _item;
     private bool _isEmptySlot = true;
     private DraggedItem _draggedItem;
+    private Canvas _canvas;
 
     public bool IsEmpty() => _isEmptySlot;
     public Item GetSlotItem() => _item;
 
-    public void InitializeSlot(InventoryService inventory)
+    public void InitializeSlot(InventoryService inventory, Canvas canvas)
     {
         _inventory = inventory;
-        if(!_slotType.Equals(InventorySlotType.Bag))
+        _canvas = canvas;
+
+        if (!_slotType.Equals(InventorySlotType.Bag))
         {
             _inventory.NotifySlotChanged(this, _item);
         }

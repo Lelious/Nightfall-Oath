@@ -66,9 +66,9 @@ public class SceneInitializerService : IInitializable, IDisposable
         var playerHUD = playerHUDobj.GetComponent<PlayerHUD>();
         _container.BindInstance(playerHUD).AsSingle();
 
-        var bottomPanelObj = _instantiator.InstantiatePrefab(interfaceUiPrefab);
-        var bottomPannel = bottomPanelObj.GetComponent<BottomPannelService>();
-        _container.BindInstance(bottomPannel).AsSingle();
+        //var bottomPanelObj = _instantiator.InstantiatePrefab(interfaceUiPrefab);
+        //var bottomPannel = bottomPanelObj.GetComponent<BottomPannelService>();
+        //_container.BindInstance(bottomPannel).AsSingle();
 
         var navMeshBuilderObj = _instantiator.InstantiatePrefab(navMeshPrefab);
         var navMeshBuilder = navMeshBuilderObj.GetComponent<NavMeshBuilderService>();
@@ -84,7 +84,7 @@ public class SceneInitializerService : IInitializable, IDisposable
 
         _spawnedInstances.AddRange(new[]
         {
-            playerHUDobj, bottomPanelObj, cameraObj, heroObj, navMeshBuilderObj, chunkGeneratorObj, screenTargetObj
+            playerHUDobj, /*bottomPanelObj,*/ cameraObj, heroObj, navMeshBuilderObj, chunkGeneratorObj, screenTargetObj
         });     
     }
 

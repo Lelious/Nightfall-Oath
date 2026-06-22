@@ -1,34 +1,28 @@
-using UnityEngine;
+using System.Runtime.CompilerServices;
+using Unity.Burst;
+using Unity.Mathematics;
 
 namespace LeliousExtentions
 {
     public static class LeliousMathematic
     {
-        public static bool FlatDistanceGreaterThan(Vector2 pos1, Vector2 pos2, float distance)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool FlatDistanceGreaterThan(float2 pos1, float2 pos2, float distance)
         {
-            var dx = pos1.x - pos2.x;
-            var dy = pos1.y - pos2.y;
-            var distSqr = dx * dx + dy * dy;
-            return distSqr > distance * distance;
+            return math.distancesq(pos1, pos2) > (distance * distance);
         }
 
-        public static bool DistanceGreaterThan(Vector3 pos1, Vector3 pos2, float distance)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool DistanceGreaterThan(float3 pos1, float3 pos2, float distance)
         {
-            var dx = pos1.x - pos2.x;
-            var dy = pos1.y - pos2.y;
-            var dz = pos1.z - pos2.z;
-
-            var distSqr = dx * dx + dy * dy + dz * dz;
-
-            return distSqr > distance * distance;
+            return math.distancesq(pos1, pos2) > (distance * distance);
         }
 
-        public static bool GridDistanceGreaterThan(Vector2Int pos1, Vector2Int pos2, int distance)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool GridDistanceGreaterThan(int2 pos1, int2 pos2, int distance)
         {
-            var dx = pos1.x - pos2.x;
-            var dy = pos1.y - pos2.y;
-
-            return Mathf.Abs(dx) > distance || Mathf.Abs(dy) > distance;
+            int2 delta = math.abs(pos1 - pos2);
+            return delta.x > distance || delta.y > distance;
         }
     }
 }

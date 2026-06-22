@@ -8,6 +8,7 @@ public class InventoryService : MonoBehaviour
     [SerializeField] private DroppedItem _droppedItemPrefab;
     [SerializeField] private Character _character;
     [SerializeField] private Color _greenColor, _redColor;
+    [SerializeField] private Canvas _canvas;
 
     private IInstantiator _instantiator;
     private UIItemInventorySlot _highlightedSlot;
@@ -23,7 +24,7 @@ public class InventoryService : MonoBehaviour
     {
         foreach (var slot in _inventorySlots)
         {
-            slot.InitializeSlot(this);
+            slot.InitializeSlot(this, _canvas);
         }
     }
 

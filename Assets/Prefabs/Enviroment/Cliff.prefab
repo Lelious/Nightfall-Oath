@@ -103,5 +103,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 195859c40db126c4db7dca1380aa70ce, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MapEnviromentObject
-  ID: 14
-  _persistentObject: 1
+  ID: 7
+  Type: 0

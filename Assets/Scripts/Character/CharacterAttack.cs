@@ -1,6 +1,7 @@
 using LeliousExtentions;
 using System.Collections;
 using UniRx;
+using Unity.Mathematics;
 using UnityEngine;
 using Zenject;
 
@@ -50,7 +51,7 @@ public class CharacterAttack : AttackComponent
         {
             if (_targetToAttack != null)
             {
-                var crit = Random.Range(0, 2);
+                var crit = UnityEngine.Random.Range(0, 2);
                 var damage = crit > 0 ? 40f : 20f;
                 _damageService.ProcessDamage(_targetToAttack.GetHealth(), damage, crit > 0 ? DamageSource.Critical : DamageSource.Creature);
             }
@@ -66,7 +67,7 @@ public class CharacterAttack : AttackComponent
             _attackDistance = _character.GetAttackDistance();
             _targetToAttack = _targetToAttack == null ||
                                 _targetToAttack.GetHealth().CurrentHp.Value <= 0 ||
-                                LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(_targetToAttack.transform.position.x, _targetToAttack.transform.position.z), 1.5f) ?
+                                LeliousMathematic.FlatDistanceGreaterThan(new float2(transform.position.x, transform.position.z), new float2(_targetToAttack.transform.position.x, _targetToAttack.transform.position.z), 1.5f) ?
                                 _targetingService.FindTarget(transform.position) : _targetToAttack;
 
             if (_targetToAttack == null)
@@ -75,7 +76,7 @@ public class CharacterAttack : AttackComponent
                 return;
             }
 
-            if (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(_targetToAttack.transform.position.x, _targetToAttack.transform.position.z), _attackDistance))
+            if (LeliousMathematic.FlatDistanceGreaterThan(new float2(transform.position.x, transform.position.z), new float2(_targetToAttack.transform.position.x, _targetToAttack.transform.position.z), _attackDistance))
             {               
                 _targetToChase = _targetToAttack;
 
@@ -137,7 +138,7 @@ public class CharacterAttack : AttackComponent
 
     private IEnumerator ChaseRoutine()
     {
-        while (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(transform.position.x, transform.position.z), new Vector2(_targetToChase.transform.position.x, _targetToChase.transform.position.z), _attackDistance))
+        while (LeliousMathematic.FlatDistanceGreaterThan(new float2(transform.position.x, transform.position.z), new float2(_targetToChase.transform.position.x, _targetToChase.transform.position.z), _attackDistance))
         {
             _movementComponent.MoveToPoint(_targetToAttack.transform.position);
             yield return new WaitForSeconds(0.1f);

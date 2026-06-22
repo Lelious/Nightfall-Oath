@@ -146,7 +146,7 @@ Material:
     - _HeightCutoff: 2
     - _HeightScale: 0.005
     - _HeightSoftness: 1
-    - _MatcapIntensity: 0.3
+    - _MatcapIntensity: 1
     - _MaxDistance: 0
     - _MaxRadius: 2
     - _Metallic: 0
@@ -177,7 +177,7 @@ Material:
     - _WorkflowMode: 1
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _BaseColor: {r: 0.7924528, g: 0.7924528, b: 0.7924528, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _FogColor: {r: 0.5, g: 0.6, b: 0.7, a: 1}

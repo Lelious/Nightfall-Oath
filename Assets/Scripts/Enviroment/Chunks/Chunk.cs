@@ -1,11 +1,12 @@
 using Cysharp.Threading.Tasks;
+using System;
 using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.ResourceManagement.AsyncOperations;
 
-public class Chunk : MonoBehaviour
+public class Chunk : MonoBehaviour, IDisposable
 {
     [SerializeField] private MeshFilter _meshFilter;
     [HideInInspector] public Mesh Mesh;
@@ -45,5 +46,13 @@ public class Chunk : MonoBehaviour
         {
             _chunkObjectsInfo.Add(item);
         }
+    }
+
+    public void Dispose()
+    {
+        if (Vertices.IsCreated)
+            Vertices.Dispose();
+        if (Normals.IsCreated)
+            Normals.Dispose();
     }
 }

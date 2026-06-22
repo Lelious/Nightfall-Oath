@@ -7,7 +7,7 @@ public static class BinaryChunkSerializer
     private const float Range = 1000f;
     private const float ScaleMax = 300f;
 
-    public static byte[] Serialize(IMapObject[] objects)
+    public static byte[] Serialize(IMapObject[] objects, Vector3 chunkCenter)
     {
         using (MemoryStream ms = new MemoryStream())
         using (BinaryWriter writer = new BinaryWriter(ms))
@@ -17,11 +17,16 @@ public static class BinaryChunkSerializer
             {
                 writer.Write(obj.Id());
 
-                WriteVector3Ushort(writer, obj.Position(), Range, false);
+                Vector3 localPos = obj.Position() - chunkCenter;
+
+                localPos.x += 50f;
+                localPos.z += 50f;
+                float chunkRange = 100f;
+
+                WriteVector3Ushort(writer, localPos, chunkRange, true);
                 WriteRotationEuler(writer, obj.Rotation());
                 WriteVector3Ushort(writer, obj.Scale(), ScaleMax, false);
                 WriteType(writer, obj.ObjType());
-              
 
                 if (obj.ObjType().Equals(MapObjectType.Creature))
                 {
@@ -36,7 +41,7 @@ public static class BinaryChunkSerializer
         }
     }
 
-    public static List<MapObjectInfo> Deserialize(byte[] data)
+    public static List<MapObjectInfo> Deserialize(byte[] data, Vector3 chunkCenter)
     {
         var list = new List<MapObjectInfo>();
         using (MemoryStream ms = new MemoryStream(data))
@@ -46,11 +51,16 @@ public static class BinaryChunkSerializer
             for (int i = 0; i < count; i++)
             {
                 ushort id = reader.ReadUInt16();
-                Vector3 pos = ReadVector3Ushort(reader, Range, false);
+                float chunkRange = 100f;
+                Vector3 localPos = ReadVector3Ushort(reader, chunkRange, true);
+
+                localPos.x -= 50f;
+                localPos.z -= 50f;
+
+                Vector3 globalPos = chunkCenter + localPos;
                 Quaternion rot = ReadRotationEuler(reader);
                 Vector3 scale = ReadVector3Ushort(reader, ScaleMax, false);
                 MapObjectType type = ReadType(reader);
-
 
                 if (type.Equals(MapObjectType.Creature))
                 {
@@ -58,11 +68,11 @@ public static class BinaryChunkSerializer
                     ushort level = reader.ReadUInt16();
                     bool elite = reader.ReadBoolean();
 
-                    list.Add(new MapCreatureInfo(id, pos, rot, scale, type, creatureType, level, elite));
+                    list.Add(new MapCreatureInfo(id, globalPos, rot, scale, type, creatureType, level, elite));
                 }
                 else
                 {
-                    list.Add(new MapObjectInfo(id, pos, rot, scale, type));
+                    list.Add(new MapObjectInfo(id, globalPos, rot, scale, type));
                 }
             }
         }
@@ -74,9 +84,9 @@ public static class BinaryChunkSerializer
     {
         float min = isPositiveOnly ? 0f : -range;
 
-        ushort x = (ushort)(Mathf.Clamp01(Mathf.InverseLerp(min, range, v.x)) * 65535f);
-        ushort y = (ushort)(Mathf.Clamp01(Mathf.InverseLerp(min, range, v.y)) * 65535f);
-        ushort z = (ushort)(Mathf.Clamp01(Mathf.InverseLerp(min, range, v.z)) * 65535f);
+        ushort x = (ushort)Mathf.RoundToInt(Mathf.Clamp01(Mathf.InverseLerp(min, range, v.x)) * 65535f);
+        ushort y = (ushort)Mathf.RoundToInt(Mathf.Clamp01(Mathf.InverseLerp(min, range, v.y)) * 65535f);
+        ushort z = (ushort)Mathf.RoundToInt(Mathf.Clamp01(Mathf.InverseLerp(min, range, v.z)) * 65535f);
 
         w.Write(x);
         w.Write(y);

@@ -12,7 +12,8 @@ public class PlayerHUD : MonoBehaviour
     [SerializeField] private List<ActionButton> _actionButtons;
 
     private readonly CompositeDisposable _disposables = new();
-    private InputService _inputService; 
+    private InputService _inputService;
+    private Light _mainLight;
 
     [Inject]
     public void Construct(InputService inputService)
@@ -50,6 +51,23 @@ public class PlayerHUD : MonoBehaviour
             (target, isAuto) => (target, isAuto))
             .Subscribe(result => OnTargetChanged(result.target, result.isAuto))
             .AddTo(_disposables);
+    }
+
+    public void TESTSetDayNight()
+    {
+        if(_mainLight == null)
+        {
+            _mainLight = FindAnyObjectByType<Light>();           
+        }
+
+        if (_mainLight.intensity < 1.0f)
+        {
+            _mainLight.intensity = 1.0f;
+        }
+        else
+        {
+            _mainLight.intensity = 0.1f;
+        }
     }
 
     private void OnTargetChanged(Enemy newTarget, bool isAutotarget)

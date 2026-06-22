@@ -22,6 +22,10 @@ public class CustomLight : MonoBehaviour
 
             _finalIntensity = _intensity * modifier;
         }
+        else
+        {
+            _finalIntensity = _intensity;
+        }
     }
 
     [Inject]
@@ -37,9 +41,23 @@ public class CustomLight : MonoBehaviour
     }
 
     public Vector4 GetColor()
-    {
+    {       
         Color final = _color * _finalIntensity;
-        return new Vector4(final.r, final.g, final.b, 1f);
+        return new Vector4(final.r, final.g, final.b, 1);
+    }
+
+    public float GetIntensity() => _finalIntensity;
+
+    public void SetData(Vector4 data)
+    {
+        _radius = data.x;
+        _intensity = data.y;
+        _flickerSpeed = data.z;
+        _flickering = data.w > 0.1f ? true : false; 
+    }
+    public void SetColor(Color color)
+    {
+        _color = color;
     }
 
     private void OnDrawGizmos()

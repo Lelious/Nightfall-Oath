@@ -33,21 +33,15 @@ Shader "Unlit/SimpleLightShader"
         { 
             "RenderType" = "Opaque" 
             "RenderPipeline" = "UniversalPipeline" 
-            "Queue" = "Geometry" 
+            "Queue" = "Geometry"
         } 
+
         Pass 
         { 
             Name "ForwardPass" 
             Tags 
             {
                 "LightMode" = "UniversalForward"
-            } 
-
-            Stencil
-            {
-                Ref 1
-                Comp NotEqual
-                Pass Keep
             }
 
             HLSLPROGRAM
@@ -55,12 +49,8 @@ Shader "Unlit/SimpleLightShader"
             #pragma vertex Vertex 
             #pragma fragment Fragment 
             #pragma exclude_renderers d3d11_9x 
-            #pragma shader_feature _LIGHTMODE_UNLIT _LIGHTMODE_LIT 
-            #pragma multi_compile _ _FORWARD_PLUS  
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS 
-            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN 
-            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS 
-            #pragma multi_compile _ _SHADOWS_SOFT 
+            #pragma shader_feature _LIGHTMODE_LIT
+            #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE 
             #pragma multi_compile_instancing
             #pragma target 2.0
 
@@ -318,39 +308,62 @@ Shader "Unlit/SimpleLightShader"
             { 
                 "LightMode"="ShadowCaster" 
             } 
-            ZWrite On 
+
+            Cull Back
+            ColorMask 0
+            ZWrite On
             ZTest LEqual
-            ColorMask 0 
 
             HLSLPROGRAM 
 
-            #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
             #pragma vertex vertShadow 
             #pragma fragment fragShadow 
-
+            #pragma multi_compile_instancing
+            #pragma multi_compile_shadowcaster
+            #pragma target 2.0
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl" 
-            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Lighting.hlsl"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl" 
+
+            float3 _LightDirection;
 
             struct Attributes 
             { 
                 float4 positionOS : POSITION; 
+                float3 normalOS : NORMAL;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             }; 
 
             struct Varyings 
             { 
                 float4 positionHCS : SV_POSITION; 
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             }; 
 
             Varyings vertShadow(Attributes v) 
             { 
                 Varyings o; 
-                o.positionHCS = TransformObjectToHClip(v.positionOS.xyz); 
+                UNITY_SETUP_INSTANCE_ID(v); 
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+
+                float3 positionWS = TransformObjectToWorld(v.positionOS.xyz);
+                float3 normalWS = TransformObjectToWorldNormal(v.normalOS);
+                
+                float3 lightDirectionWS = _MainLightPosition.xyz;
+                
+                o.positionHCS = TransformWorldToHClip(ApplyShadowBias(positionWS, normalWS, lightDirectionWS));
+                
+                #if UNITY_REVERSED_Z
+                    o.positionHCS.z = min(o.positionHCS.z, o.positionHCS.w * UNITY_NEAR_CLIP_VALUE);
+                #else
+                    o.positionHCS.z = max(o.positionHCS.z, o.positionHCS.w * UNITY_NEAR_CLIP_VALUE);
+                #endif
+                
                 return o; 
             } 
 
             half4 fragShadow(Varyings i) : SV_Target 
             { 
+                UNITY_SETUP_INSTANCE_ID(i); 
                 return 0; 
             } 
             ENDHLSL 

@@ -1,6 +1,7 @@
 using Cysharp.Threading.Tasks;
 using LeliousExtentions;
 using System.Collections.Generic;
+using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using Zenject;
@@ -112,7 +113,7 @@ public class PoolService
 
                 Vector3 objPos = obj.Position();
 
-                if (LeliousMathematic.FlatDistanceGreaterThan(new Vector2(position.x, position.y),
+                if (LeliousMathematic.FlatDistanceGreaterThan(new float2(position.x, position.y),
                     new Vector2(objPos.x, objPos.z), clearDistance))
                 {
                     GameObject.Destroy(obj.Transform().gameObject);

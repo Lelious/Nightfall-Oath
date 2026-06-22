@@ -1,21 +1,48 @@
 Shader "Custom/Stencil"
 {
+    Properties
+    {
+        [IntRange] _StencilRef ("Stencil Ref ID", Range(0, 255)) = 1
+    }
     SubShader
     {
-        Tags { "RenderType"="Opaque" "Queue"="Geometry-1" }
+        Tags 
+        { 
+            "RenderType"="Opaque" 
+            "Queue"="Geometry"
+            "RenderPipeline" = "UniversalPipeline"
+        }
 
         Pass
         {
-            ColorMask 0
-            ZTest Always
+            Blend Zero One
             ZWrite Off
+            ZTest LEqual
+            Cull Front
 
             Stencil
             {
-                Ref 1 
+                Ref [_StencilRef]
                 Comp Always
-                Pass Replace
+                Pass Keep
             }
+            
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment frag
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
+
+            struct Attributes { float4 positionOS : POSITION; };
+            struct Varyings { float4 positionCS : SV_POSITION; };
+
+            Varyings vert(Attributes input)
+            {
+                Varyings output;
+                output.positionCS = TransformObjectToHClip(input.positionOS.xyz);
+                return output;
+            }
+            half4 frag(Varyings input) : SV_Target { return half4(0,0,0,0); }
+            ENDHLSL
         }
     }
 }
